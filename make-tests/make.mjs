@@ -3,6 +3,8 @@ import {readFileSync, writeFileSync} from 'node:fs';
 
 const VERSION = readFileSync(new URL('../src/Punycode.sol', import.meta.url), {encoding: 'utf8'}).match(/pragma solidity (.*);/m)[1];
 
+console.log(import.meta.url);
+
 console.log(VERSION);
 
 // https://datatracker.ietf.org/doc/html/rfc3492#section-7.1
@@ -60,7 +62,8 @@ function write_test_file(name, recs) {
 		map.set(x.punycode, x);
 		return x;
 	});
-	let code = `// SPDX-License-Identifier: MIT
+	let code = `// generated ${new Date().toISOString()}
+// SPDX-License-Identifier: MIT
 pragma solidity ${VERSION};
 
 import {Test} from "forge-std/Test.sol";

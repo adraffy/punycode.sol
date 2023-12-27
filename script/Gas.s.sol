@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.13;
 
-import "forge-std/Script.sol";
-import {console2} from "forge-std/Test.sol";
+import {Script, console2} from "forge-std/Script.sol";
 import {Punycode} from "../src/Punycode.sol";
 
 contract Gas is Script {
