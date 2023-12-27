@@ -6,8 +6,8 @@ Solidity [Punycode](https://datatracker.ietf.org/doc/html/rfc3492) decoder witho
 
 * Library: [Punycode.sol](./src/Punycode.sol)
 * `~600 gas/codepoint`
-* Reference: [adraffy/punycode.js](../punycode.js/)
-* [**Demo**](./test/demo.html) ⭐
+* Reference: [adraffy/punycode.js](https://github.com/adraffy/punycode.js/)
+* [**Demo**](https://adraffy.github.io/punycode.sol/test/demo.html) ⭐
 
 
 ```solidity
