@@ -1,0 +1,31 @@
+[
+	{
+		"unicode": "",
+		"comment": "empty string"
+	},
+	{
+		"unicode": "0123456789-abcdefghijklmnopqrstuvwxyz",
+		"comment": "basic ascii"
+	},
+	{
+		"punycode": "xn--💩",
+		"error": true
+	},
+	{
+		"punycode": "xn--0",
+		"error": true
+	},
+
+	{ "unicode": "mañana", "comment": "nodejs example #1" },
+	{ "unicode": "☃-⌘", "comment": "nodejs example #2" },
+
+	{ "punycode": "xn--ls8h", "comment": "unstyled poop" },
+	{ "punycode": "xn--v86cw764b", "comment": "emoji-style poop" },
+	{ "punycode": "xn--u86cy764b", "comment": "text-style poop" },
+	{
+		"punycode": "xn--8c9by4f",
+		"comment": "surrogate poop",
+		"error": true,
+		"unicode": "💩"
+	}
+]

@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Punycode Decoder</title>
+<style>
+body {
+	margin: 3rem;
+	background: #eee;
+}
+button {
+	cursor: pointer;
+}
+header {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: space-between;
+	gap: 4px 8px;
+}
+h1 {
+	margin: 0;
+}
+#github {
+	text-align: right;
+	display: flex;
+	flex-direction: column;
+}
+#contract {
+	font-family: monospace;
+}
+#examples {
+	margin: 8px 0;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+}
+input {
+	display: block;
+	box-sizing: border-box;
+	width: 100%;
+	font-size: 24px;
+	padding: 8px;
+}
+#output:empty {
+	display: none;
+}
+#output {
+	margin-top: 8px;
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	font-size: 16pt;
+}
+#status {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+.spinner {
+	display: inline-block;
+	width: 24px;
+	height: 24px;
+	box-sizing: border-box;
+	animation: spin 2s infinite linear;
+	border: 3px solid #000;
+	border-bottom-color: transparent;
+	border-radius: 100%;
+}
+#error {
+	background: #fcc;
+	padding: 8px;
+}
+@keyframes spin {
+	to { transform:rotate(360deg); }
+}	
+footer {
+	margin-top: 16px;
+	text-align: center;
+}
+</style>
+</head>
+<body>
+<header>
+	<h1>Punycode.sol</h1>
+	<div id="github">
+		<a href="https://github.com/adraffy/punycode.sol">adraffy/punycode.sol</a>
+	</div>
+</header>
+<div id="contract">
+	<a href="https://basescan.org/address/0xa2e3c1b0a43336a21e2fa56928bc7b7848c156a8">base:0xA2e3c1b0a43336A21E2fA56928bc7B7848c156A8</a>
+</div>
+<div id="examples">
+	<button>xn--ls8h</button>
+	<button>xn--w77hd</button>
+	<button>xn--1ugaa67909bbab66ycac</button>
+</div>
+<input placeholder="Punycode: xn--ls8h" value="xn--ls8h">
+<div id="output">
+	<div id="status"><span class="spinner"></span> Initializing</div>
+</div>
+<footer>Created by <a href="https://twitter.com/adraffy">raffy.eth</a></footer>
+<script type="module">
+import {ethers} from 'https://cdnjs.cloudflare.com/ajax/libs/ethers/6.9.1/ethers.min.js';
+
+const input = document.querySelector('input');
+const output = document.querySelector('#output');
+
+let timer;
+let working;
+let provider = new ethers.JsonRpcProvider('https://mainnet.base.org', 8453, {staticNetwork: true});
+
+let contract = new ethers.Contract('0xA2e3c1b0a43336A21E2fA56928bc7B7848c156A8', [
+	`function decode(string memory s) public pure returns (string memory)`
+], provider);
+
+for (let btn of document.querySelectorAll('#examples button')) {
+	btn.addEventListener('click', () => {
+		input.value = btn.innerText;
+		update();
+	});
+}
+
+input.addEventListener('input', mark_dirty);
+
+update();
+
+function mark_dirty() {
+	if (working) {
+		timer = true;
+	} else {
+		clearTimeout(timer);
+		timer = setTimeout(update, 500);
+	}
+}
+
+async function update() {
+	if (working) {
+		timer = true;
+		return;
+	}
+	clearTimeout(timer);
+	timer = null;
+	let label = input.value.trim();
+	if (!label) {
+		output.innerHTML = '';
+		return;
+	}
+	output.innerHTML = `<div id="status"><span class="spinner"></span> Decoding</div>`;
+	working = true;
+	// let browser;
+	// try {
+	// 	browser = new URL(`http://${label}`).hostname;
+	// } catch (err) {		
+	// }
+	try {
+		let decoded = await contract.decode(label);
+		output.innerHTML = `
+			<code>${Array.from(decoded).map(x => `{${x.codePointAt(0).toString(16).toUpperCase()}}`).join('')}</code>
+			<input readonly>
+		`;
+		//	<b>Match Browser: ${browser === decoded || browser === label ? '✅' : '❌'}</b>
+		output.querySelector('input').value = decoded;
+	} catch (err) {
+		let error;
+		if (err.code === 'CALL_EXCEPTION') {
+			error = `<b>Invalid Punycode</b>: ${err.reason}`;
+		} else {
+			error = `<b>Error</b>: ${err.message}`;
+		}
+		output.innerHTML = `<div id="error">⚠️ ${error}</div>`;
+	}
+	working = false;
+	if (timer) {
+		mark_dirty();
+	}
+}
+
+</script>
+</body>
+</html>
