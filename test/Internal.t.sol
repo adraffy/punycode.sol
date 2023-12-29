@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.13;
+pragma solidity ^0.8.23;
 
 import {Test} from "forge-std/Test.sol";
 import {Punycode} from "../src/Punycode.sol";
@@ -234,7 +234,7 @@ contract Test_Internal is Test {
 	}
 
 	function str_from_cps(uint256[] memory cps, uint256 len) internal pure returns (string memory) {
-		bytes memory v = new bytes(6 * len);
+		bytes memory v = new bytes(4 * len);
 		uint256 n;
 		for (uint256 i; i < len; i++) {
 			n = Punycode.writeUTF8(v, n, cps[i]);
@@ -244,6 +244,5 @@ contract Test_Internal is Test {
 		}
 		return string(v);
 	}
-
 
 }

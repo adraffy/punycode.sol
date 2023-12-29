@@ -1,11 +1,9 @@
 # punycode.sol
 
-*Under Construction*
-
 Solidity [Punycode](https://datatracker.ietf.org/doc/html/rfc3492) decoder without IDNA.
 
 * Library: [Punycode.sol](./src/Punycode.sol)
-* `~600 gas/codepoint`
+* `~500 gas/codepoint`
 * Reference: [adraffy/punycode.js](https://github.com/adraffy/punycode.js/)
 * [**Demo**](https://adraffy.github.io/punycode.sol/test/demo.html) ⭐
 
@@ -13,13 +11,12 @@ Solidity [Punycode](https://datatracker.ietf.org/doc/html/rfc3492) decoder witho
 ```solidity
 import {Punycode} from "./Punycode.sol";
 
-string memory unicode = Punycode.decode_str("xn--ls8h"); // "💩"
+string memory unicode = Punycode.decode("xn--ls8h"); // "💩"
 
 // revert on failure
 // always returns a copy
-function decode_str(string memory s) internal pure returns (string memory)
-function decode(bytes memory src) internal pure returns (bytes memory) 
-function decode(bytes memory src, uint256 start, uint256 len) 
+function decode(string memory s) pure returns (string memory)
+function decode(bytes memory src, uint256 start, uint256 len) pure returns (bytes memory)
 ```
 
 ## Build
@@ -30,5 +27,5 @@ function decode(bytes memory src, uint256 start, uint256 len)
 #### Create Tests
 * `cd make-tests/`
 * `npm i`
-* [`node fetch-ens.mjs`](./make-tests/fetch-ens.mjs) — sample from [registrations](../ens-labels/)
-* [`node make.mjs`](./make-tests/make.mjs) — create [tests](./test/)
+* [`node fetch-ens.mjs`](./make-tests/fetch-ens.mjs) — sample from [registrations](https://github.com/adraffy/ens-labels/)
+* [`node make.mjs`](./make-tests/make.mjs) — convert [data](./test/data/) into [tests](./test/)

@@ -34,7 +34,7 @@ library Punycode {
 	}
 
 	// https://datatracker.ietf.org/doc/html/rfc3492#section-6.1
-	function _adaptBias(uint256 delta, uint256 len, bool first) internal pure returns (uint256) {
+	function adaptBias(uint256 delta, uint256 len, bool first) internal pure returns (uint256) {
 		unchecked {
 			delta = delta / (first ? DAMP : 2);
 			delta += (delta / len);
@@ -48,11 +48,8 @@ library Punycode {
 	}
 
 	// convenience
-	function decode_str(string memory s) internal pure returns (string memory) { 
-		return string(decode(bytes(s)));
-	}
-	function decode(bytes memory src) internal pure returns (bytes memory) {
-		return decode(src, 0, src.length);
+	function decode(string memory s) internal pure returns (string memory) { 
+		return string(decode(bytes(s), 0, bytes(s).length));
 	}
 
 	// always returns a copy
@@ -98,7 +95,7 @@ library Punycode {
 					if (basic < t) break;
 					w *= BASE - t;
 				}
-				bias = _adaptBias(i - prev, ++n, prev == 0);
+				bias = adaptBias(i - prev, ++n, prev == 0);
 				cp += i / n;
 				require(cp >= MIN_CP && cp <= MAX_CP, "invalid");
 				i %= n;
@@ -133,7 +130,7 @@ library Punycode {
 				assembly {
 					cp := and(mload(p), 0xFFFFFFFF) // read uint32
 				}
-				len = writeUTF8(ret, len, uint32(cp)); // encode
+				len = writeUTF8(ret, len, cp); // encode
 			}
 			assembly {
 				mstore(ret, len) // truncate
@@ -141,7 +138,7 @@ library Punycode {
 		}
 	}
 
-	function slice(bytes memory src, uint256 pos, uint256 len) internal pure returns (bytes memory ret){		
+	function slice(bytes memory src, uint256 pos, uint256 len) internal pure returns (bytes memory ret) {
 		ret = new bytes(len);
 		uint256 ptr;
 		uint256 end;

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.13;
+pragma solidity ^0.8.23;
 
 import {Script, console2} from "forge-std/Script.sol";
 import {Punycode} from "../src/Punycode.sol";
@@ -200,7 +200,7 @@ contract Gas is Script {
 
 	function dump(string memory p) internal view {
 		uint256 g = gasleft();
-		string memory u = Punycode.decode_str(p);
+		string memory u = Punycode.decode(p);
 		g -= gasleft();
 		console2.log(g / max(1, bytes(u).length), g, p);
 	}

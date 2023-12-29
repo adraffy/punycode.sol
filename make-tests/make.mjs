@@ -72,7 +72,7 @@ import {Punycode} from "../src/Punycode.sol";
 contract Test_${name} is Test {
 ${recs.map(({unicode, punycode, comment, error}) => `
 	function test${error ? 'Fail' : ''}_${safe_identifier(punycode)}() public {${comment ? ` // ${comment}` : ''}
-		assertEq(unicode"${unicode}", Punycode.decode_str(unicode"${punycode}"));
+		assertEq(unicode"${unicode}", Punycode.decode(unicode"${punycode}"));
 	}\n`).join('')}
 }`;
 	let file = new URL(`../test/${name}.t.sol`, import.meta.url);
