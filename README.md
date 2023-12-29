@@ -4,9 +4,9 @@ Solidity [Punycode](https://datatracker.ietf.org/doc/html/rfc3492) decoder witho
 
 * Library: [Punycode.sol](./src/Punycode.sol)
 * `~500 gas/codepoint`
-* Deployment: [`base:0xA2e3c1b0a43336A21E2fA56928bc7B7848c156A8`](https://basescan.org/address/0xa2e3c1b0a43336a21e2fa56928bc7b7848c156a8#code)
-* Reference: [adraffy/punycode.js](https://github.com/adraffy/punycode.js/)
 * [**Demo**](https://adraffy.github.io/punycode.sol/test/demo.html) ⭐
+* Live Deployment: [`base:0xA2e3c1b0a43336A21E2fA56928bc7B7848c156A8`](https://basescan.org/address/0xa2e3c1b0a43336a21e2fa56928bc7b7848c156a8#code)
+* Reference Implementation: [adraffy/punycode.js](https://github.com/adraffy/punycode.js/)
 
 
 ```solidity

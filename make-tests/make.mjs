@@ -3,8 +3,6 @@ import {readFileSync, writeFileSync} from 'node:fs';
 
 const VERSION = readFileSync(new URL('../src/Punycode.sol', import.meta.url), {encoding: 'utf8'}).match(/pragma solidity (.*);/m)[1];
 
-console.log(import.meta.url);
-
 console.log(VERSION);
 
 // https://datatracker.ietf.org/doc/html/rfc3492#section-7.1

@@ -12,8 +12,8 @@ contract Gas is Script {
 		mixed();
 		// longest dns label possible:
 		// len(encode("{10000}")) = 8 bytes, for 1 codepoint
-		// 63 - 8 = 55 repeated codepoints (using a...)
-		// (1 + 53) * 4 bytes = 224 bytes
+		// 63 - 8 = 55 duplicate codepoints (using a...)
+		// (1 + 55) * 4 bytes = 224 bytes
 	}
 	
 	function ascii() internal view {
