@@ -11,6 +11,8 @@ body {
 }
 button {
 	cursor: pointer;
+	font-size: 100%;
+	padding: 4px 8px;
 }
 header {
 	display: flex;
@@ -29,11 +31,23 @@ h1 {
 #contract {
 	font-family: monospace;
 }
-#examples {
+#actions {
 	margin: 8px 0;
 	display: flex;
+	justify-content: space-between;
+	align-items: end;
+}
+#verify_btn {
+	white-space: pre;
+}
+#examples {
+	display: flex;
 	flex-wrap: wrap;
-	gap: 8px;
+	font-size: 80%;
+	gap: 4px;
+}
+#examples button {
+	padding: 2px 4px;
 }
 input {
 	display: block;
@@ -50,7 +64,6 @@ input {
 	display: flex;
 	flex-direction: column;
 	gap: 8px;
-	font-size: 16pt;
 }
 #status {
 	display: flex;
@@ -67,6 +80,9 @@ input {
 	border-bottom-color: transparent;
 	border-radius: 100%;
 }
+#codepoints {	
+	font-size: 16pt;
+}
 #error {
 	background: #fcc;
 	padding: 8px;
@@ -78,24 +94,37 @@ footer {
 	margin-top: 16px;
 	text-align: center;
 }
+@media only screen and (max-width: 800px) { 
+	body {
+		margin: 1rem;
+	}
+}
 </style>
 </head>
 <body>
 <header>
-	<h1>Punycode.sol</h1>
+	<h1>Punycode Decoder</h1>
 	<div id="github">
 		<a href="https://github.com/adraffy/punycode.sol">adraffy/punycode.sol</a>
 	</div>
 </header>
 <div id="contract">
-	<a href="https://basescan.org/address/0xa2e3c1b0a43336a21e2fa56928bc7b7848c156a8">base:0xA2e3c1b0a43336A21E2fA56928bc7B7848c156A8</a>
+	<a href="https://basescan.org/address/0x504df0Fc26dA4eD7564652D22f13CD4d58c4BAa1#code">base:0x504df0Fc26dA4eD7564652D22f13CD4d58c4BAa1</a>
 </div>
-<div id="examples">
-	<button>xn--ls8h</button>
-	<button>xn--w77hd</button>
-	<button>xn--1ugaa67909bbab66ycac</button>
+<div id="actions">
+	<div id="examples">
+		<button>xn--ls8h</button>
+		<button>xn--w77hd</button>
+		<button>xn--poop-vv63cbab</button>
+		<button>xn--ns8haa78mbab</button>
+		<button>xn--1ugaa67909bbab66ycac</button>
+		<button data-puny="xn--_">❌ Not Basic</button>
+		<button data-puny="xn--0">❌ Overflow</button>
+		<button data-puny="xn--8c9by4f">❌ Surrogates</button>
+	</div>
+	<button id="verify_btn">✅ Verify</button>
 </div>
-<input placeholder="Punycode: xn--ls8h" value="xn--ls8h">
+<input placeholder="xn--ls8h" value="xn--ls8h">
 <div id="output">
 	<div id="status"><span class="spinner"></span> Initializing</div>
 </div>
@@ -103,26 +132,30 @@ footer {
 <script type="module">
 import {ethers} from 'https://cdnjs.cloudflare.com/ajax/libs/ethers/6.9.1/ethers.min.js';
 
-const input = document.querySelector('input');
+const input_field = document.querySelector('input');
 const output = document.querySelector('#output');
 
 let timer;
 let working;
 let provider = new ethers.JsonRpcProvider('https://mainnet.base.org', 8453, {staticNetwork: true});
 
-let contract = new ethers.Contract('0xA2e3c1b0a43336A21E2fA56928bc7B7848c156A8', [
-	`function decode(string memory s) public pure returns (string memory)`
+let contract = new ethers.Contract('0x504df0Fc26dA4eD7564652D22f13CD4d58c4BAa1', [
+	`function decode(string memory s) external pure returns (string memory)`
 ], provider);
 
 for (let btn of document.querySelectorAll('#examples button')) {
 	btn.addEventListener('click', () => {
-		input.value = btn.innerText;
+		input_field.value = btn.dataset.puny || btn.innerText;
 		update();
 	});
 }
-
-input.addEventListener('input', mark_dirty);
-
+document.querySelector('#verify_btn').addEventListener('click', () => {
+	let a = document.createElement('a');
+	a.target = '_blank';
+	a.href = `../../punycode.js/test/demo.html#p=${input_field.value.trim()}`;
+	a.click();
+});
+input_field.addEventListener('input', mark_dirty);
 update();
 
 function mark_dirty() {
@@ -136,35 +169,30 @@ function mark_dirty() {
 
 async function update() {
 	if (working) {
-		timer = true;
+		mark_dirty();
 		return;
 	}
 	clearTimeout(timer);
 	timer = null;
-	let label = input.value.trim();
+	let label = input_field.value.trim().toLowerCase(); // safe
 	if (!label) {
 		output.innerHTML = '';
 		return;
 	}
 	output.innerHTML = `<div id="status"><span class="spinner"></span> Decoding</div>`;
 	working = true;
-	// let browser;
-	// try {
-	// 	browser = new URL(`http://${label}`).hostname;
-	// } catch (err) {		
-	// }
 	try {
-		let decoded = await contract.decode(label);
+		let decoded = await contract.decode(label);		
 		output.innerHTML = `
-			<code>${Array.from(decoded).map(x => `{${x.codePointAt(0).toString(16).toUpperCase()}}`).join('')}</code>
+			<code id="codepoints">${Array.from(decoded).map(x => `{${x.codePointAt(0).toString(16).toUpperCase()}}`).join('')}</code>
 			<input readonly>
+			<div><b>Browser <a href="https://url.spec.whatwg.org/">URL</a> Support</b>: ${get_url_state(decoded, label)}</div>
 		`;
-		//	<b>Match Browser: ${browser === decoded || browser === label ? '✅' : '❌'}</b>
 		output.querySelector('input').value = decoded;
 	} catch (err) {
 		let error;
 		if (err.code === 'CALL_EXCEPTION') {
-			error = `<b>Invalid Punycode</b>: ${err.reason}`;
+			error = `<b>Punycode Error</b>: ${err.reason}`;
 		} else {
 			error = `<b>Error</b>: ${err.message}`;
 		}
@@ -173,6 +201,19 @@ async function update() {
 	working = false;
 	if (timer) {
 		mark_dirty();
+	}
+}
+
+function get_url_state(uni, puny) {
+	try {
+		let browser = new URL(`http://${puny}`).hostname;
+		if (uni === browser || puny === browser) {
+			return '✅';
+		} else {
+			return `⚠️ Different: <code>${browser}</code>`;
+		}
+	} catch (err) {
+		return `❌`;
 	}
 }
 
