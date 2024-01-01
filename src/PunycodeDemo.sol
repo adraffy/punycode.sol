@@ -1,6 +1,3 @@
-// Punycode Decoder
-// https://github.com/adraffy/punycode.js/blob/main/index.js
-
 /// @author raffy.eth
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.23;

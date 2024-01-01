@@ -56,25 +56,8 @@ library Punycode {
 	// https://datatracker.ietf.org/doc/html/rfc3492#section-6.2
 	function decode(bytes memory src, uint256 start, uint256 len) internal pure returns (bytes memory ret) {
 		unchecked {
-			// 1. find last hyphen
-			//
-			// 1a. verbatim: "abc" => not punycode
-			// 
-			// 1b. pure: "xn--<encoded>"
-			//                ^start
-			//               ^last-hyphen (before start)
-			//     => initial string = "" (n = 0)
-			//
-			// 1c. mixed: "xn--abcde12345-<encoded>"
-			//                 ^start    ^last-hyphen 
-			//     => initial string = "abcde12345" (n = 10)
-			//
-			// load ascii directly:
-			// |--------- 256 ---------|-----------------------+-->
-			// |61|62|63|64|65|31|32|33|34|35|  |  |  |  |  |  | uint32[]
-			// +-----------------------+-----------------------+-->
 			if (len < 4 || bytes4(src) != "xn--") return slice(src, start, len);
-			ret = new bytes(len << 2);
+			uint32[] memory v = new uint32[](len);
 			uint256 end = start + len;
 			uint256 n; // number of codepoints
 			uint256 p = end; // work backwards
@@ -82,13 +65,10 @@ library Punycode {
 			while (p > start) { 
 				if (src[--p] == '-') { // found it
 					n = p - start; // before hyphen
-					uint256 align = 3; // ascii -> uint32 => 000X
-					while (start < p) {
-						bytes1 ch = src[start];
-						require(uint8(ch) < MIN_CP, "ascii");
-						ret[align] = ch;
-						align += 4;
-						start += 1;
+					for (uint256 j; j < n; j += 1) {
+						uint32 ch = uint8(src[start + j]);
+						require(ch < MIN_CP, "ascii");
+						v[j] = ch;
 					}
 					start = p + 1; // skip hyphen
 					break;
@@ -118,71 +98,26 @@ library Punycode {
 				cp += i / n;
 				require(cp >= MIN_CP && cp <= MAX_CP, "invalid");
 				i %= n;
-				// insert codepoint at i = 2:
-				// <---------------------------- n ---------------------------->
-				// +-----------------------+-----------------------+-----------------------+
-				// |61|62|63|64|65|66|67|68|69|6A|6B|6C|6D|6E|6F|70|71|72|73|74|            | uint32[]
-				// +-----------------------+-----------------------+-----------------------+
-				//       ^head                         ^tail
-				//       |-------- save ---------|
-				//
-				// work backwards, move tail right by 4 bytes:
-				//                                     |-----------------------|
-				//                                     >>>|-----------------------|
-				// keep moving until we hit head:
-				//             |-----------------------|
-				//             >>>|-----------------------|
-				// 
-				// at head, combine inserted cp with truncated save:
-				//        <<<<<<<<<<<<<<<<<<| cp |
-				//        | cp |-------- save ---|xx|
-		        // +-----------------------+-----------------------+-----------------------+
-				// |61|62|__|63|64|65|66|67|68|69|6A|6B|6C|6D|6E|6F|70|71|72|73|74|        |
-				// +-----------------------+-----------------------+-----------------------+
-				uint256 head;
-				uint256 save;
-				uint256 tail;
-				assembly {
-					head := add(add(ret, 32), shl(2, i)) 
-					save := mload(head) 
-					tail := add(ret, shl(2, n))
+				for (uint256 j = n; j > i; j -= 1) {
+					v[j] = v[j-1]; 
 				}
-				while (head <= tail) { // work backwards
-					assembly {
-						mstore(add(tail, 4), mload(tail)) // shift right
-					}
-					tail -= 32;
-				}
-				assembly {
-					mstore(head, or(shl(224, cp), shr(32, save))) // insert
-				}
+				v[i] = uint32(cp);
 				i += 1;
 			}
 			// 3. encode codepoints as utf8
-			// input: codepoints     uint32[] = { 61, A9, 904, 1F4A9 }
-            //     61 => [61]                     |   |    |      \ 
-			//     A9 => [C2 A9]                  |   |    |       \ 
-			//    904 => [E0 A4 84]               |   |    |\___    |\______
-			//  1F4A9 => [F0 9F 92 A9]            |  / \   |    \   |       \
-			// output: utf8 bytes       bytes = [61 C2 A9 E0 A4 84 F0 9F 92 A9]
-			assembly {
-				p := ret
-			}
 			len = 0;
-			while (n != 0) {
-				n -= 1;
-				p += 4;
-				assembly {
-					cp := and(mload(p), 0xFFFFFFFF) // read uint32
-				}
-				len = writeUTF8(ret, len, cp); // encode
+			assembly {
+				ret := add(v, 32)
+			}
+			for (i = 0; i < n; i += 1) {
+				len = writeUTF8(ret, len, v[i]); // encode
 			}
 			assembly {
 				mstore(ret, len) // truncate
 			}
 		}
 	}
-
+	
 	function slice(bytes memory src, uint256 pos, uint256 len) internal pure returns (bytes memory ret) {
 		ret = new bytes(len);
 		uint256 ptr;

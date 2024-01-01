@@ -2,18 +2,20 @@
 pragma solidity ^0.8.23;
 
 import {Script, console2} from "forge-std/Script.sol";
-import {Punycode} from "../src/Punycode.sol";
+import {Punycode} from "../src/Punycode.sol";            // Gas used: 4310752
+//import {Punycode} from "../src/PunycodeWithArray.sol"; // Gas used: 4682790
 
 contract Gas is Script {
+
+	// longest dns label possible:
+	// len(encode("{10000}")) = 8 bytes, for 1 codepoint
+	// 63 - 8 = 55 duplicate codepoints (using a...)
+	// (1 + 55) * 4 bytes = 224 bytes
 
 	function run() public view {
 		ascii();
 		poops();
 		mixed();
-		// longest dns label possible:
-		// len(encode("{10000}")) = 8 bytes, for 1 codepoint
-		// 63 - 8 = 55 duplicate codepoints (using a...)
-		// (1 + 55) * 4 bytes = 224 bytes
 	}
 	
 	function ascii() internal view {
