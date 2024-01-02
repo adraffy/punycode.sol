@@ -22,6 +22,7 @@ function decode(bytes memory src, uint256 start, uint256 len) pure returns (byte
 
 ## Build
 
+* Set implementation in [PunycodeImpl.sol](./src/PunycodeImpl.sol)
 * `forge test` — run [tests](./test/)
 * `forge script Gas` — estimate gas per character
 

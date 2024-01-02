@@ -48,7 +48,7 @@ library Punycode {
 	}
 
 	// convenience
-	function decode(string memory s) internal pure returns (string memory) { 
+	function decode(string memory s) internal pure returns (string memory) {
 		return string(decode(bytes(s), 0, bytes(s).length));
 	}
 
@@ -98,6 +98,7 @@ library Punycode {
 			uint256 bias = BIAS;
 			uint256 cp = MIN_CP;
 			uint256 i;
+			p = 1;
 			while (start < end) {
 				uint256 prev = i;
 				uint256 w = 1;
@@ -114,14 +115,15 @@ library Punycode {
 					w *= BASE - t;
 				}
 				n += 1;
-				bias = adaptBias(i - prev, n, prev == 0);
+				bias = adaptBias(i - prev, n, p == 1);
+				p = 0;
 				cp += i / n;
 				require(cp >= MIN_CP && cp <= MAX_CP, "invalid");
 				i %= n;
 				// insert codepoint at i = 2:
 				// <---------------------------- n ---------------------------->
 				// +-----------------------+-----------------------+-----------------------+
-				// |61|62|63|64|65|66|67|68|69|6A|6B|6C|6D|6E|6F|70|71|72|73|74|            | uint32[]
+				// |61|62|63|64|65|66|67|68|69|6A|6B|6C|6D|6E|6F|70|71|72|73|74|           | uint32[]
 				// +-----------------------+-----------------------+-----------------------+
 				//       ^head                         ^tail
 				//       |-------- save ---------|
@@ -129,7 +131,7 @@ library Punycode {
 				// work backwards, move tail right by 4 bytes:
 				//                                     |-----------------------|
 				//                                     >>>|-----------------------|
-				// keep moving until we hit head:
+				// keep moving until we pass head:
 				//             |-----------------------|
 				//             >>>|-----------------------|
 				// 
@@ -166,19 +168,19 @@ library Punycode {
 			//  1F4A9 => [F0 9F 92 A9]            |  / \   |    \   |       \
 			// output: utf8 bytes       bytes = [61 C2 A9 E0 A4 84 F0 9F 92 A9]
 			assembly {
-				p := ret
+				start := ret
 			}
-			len = 0;
-			while (n != 0) {
-				n -= 1;
-				p += 4;
+			p = start + 32;
+			end = start + (n << 2);
+			while (start < end) {
+				start += 4;
 				assembly {
-					cp := and(mload(p), 0xFFFFFFFF) // read uint32
+					cp := and(mload(start), 0xFFFFFFFF) // read uint32
 				}
-				len = writeUTF8(ret, len, cp); // encode
+				p = writeUTF8(p, cp); // encode
 			}
 			assembly {
-				mstore(ret, len) // truncate
+				mstore(ret, sub(p, add(ret, 32))) // truncate
 			}
 		}
 	}
@@ -202,29 +204,39 @@ library Punycode {
 	}
 
 	// write codepoint as utf8 into buf at pos
+	// uses pointers to avoid bound checks
 	// return new pos
-	function writeUTF8(bytes memory buf, uint256 pos, uint256 cp) internal pure returns (uint256) {
-		unchecked {
-			if (cp < 0x800) {
-				if (cp < 0x80) {
-					buf[pos++] = bytes1(uint8(cp));
-				} else {
-					buf[pos++] = bytes1(uint8(0xC0 | (cp >> 6)));
-					buf[pos++] = bytes1(uint8(0x80 | (cp & 0x3F)));
-				} 
+	function writeUTF8(uint256 ptr, uint256 cp) internal pure returns (uint256 dst) {
+		if (cp < 0x800) {
+			if (cp < 0x80) {
+				assembly {
+					mstore8(ptr, cp)
+					dst := add(ptr, 1)
+				}
 			} else {
-				if (cp < 0x10000) {
-					buf[pos++] = bytes1(uint8(0xE0 | (cp >> 12)));
-					buf[pos++] = bytes1(uint8(0x80 | ((cp >> 6) & 0x3F)));
-					buf[pos++] = bytes1(uint8(0x80 | (cp & 0x3F)));
-				} else {
-					buf[pos++] = bytes1(uint8(0xF0 | (cp >> 18)));
-					buf[pos++] = bytes1(uint8(0x80 | ((cp >> 12) & 0x3F)));
-					buf[pos++] = bytes1(uint8(0x80 | ((cp >> 6) & 0x3F)));
-					buf[pos++] = bytes1(uint8(0x80 | (cp & 0x3F)));
+				assembly {
+					mstore8(ptr,         or(0xC0, shr(6, cp)))
+					mstore8(add(ptr, 1), or(0x80, and(cp, 0x3F)))
+					dst := add(ptr, 2)
+				}
+			} 
+		} else {
+			if (cp < 0x10000) {
+				assembly {
+					mstore8(ptr,         or(0xE0,     shr(12, cp)))
+					mstore8(add(ptr, 1), or(0x80, and(shr( 6, cp), 0x3F)))
+					mstore8(add(ptr, 2), or(0x80, and(        cp,  0x3F)))
+					dst := add(ptr, 3)
+				}
+			} else {
+				assembly {
+					mstore8(ptr,         or(0xF0,     shr(18, cp)))
+					mstore8(add(ptr, 1), or(0x80, and(shr(12, cp), 0x3F)))
+					mstore8(add(ptr, 2), or(0x80, and(shr( 6, cp), 0x3F)))
+					mstore8(add(ptr, 3), or(0x80, and(        cp,  0x3F)))
+					dst := add(ptr, 4)
 				}
 			}
-			return pos;
 		}
 	}
 

@@ -1,9 +1,9 @@
-// generated 2023-12-29T05:04:50.376Z
+// generated 2024-01-02T05:11:02.725Z
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.23;
 
 import {Test} from "forge-std/Test.sol";
-import {Punycode} from "../src/Punycode.sol";
+import {Punycode} from "../src/Impl.sol";
 
 contract Test_ENS is Test {
 

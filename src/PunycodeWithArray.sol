@@ -78,6 +78,7 @@ library Punycode {
 			uint256 bias = BIAS;
 			uint256 cp = MIN_CP;
 			uint256 i;
+			p = 1;
 			while (start < end) {
 				uint256 prev = i;
 				uint256 w = 1;
@@ -94,7 +95,8 @@ library Punycode {
 					w *= BASE - t;
 				}
 				n += 1;
-				bias = adaptBias(i - prev, n, prev == 0);
+				bias = adaptBias(i - prev, n, p == 1);
+				p = 0;
 				cp += i / n;
 				require(cp >= MIN_CP && cp <= MAX_CP, "invalid");
 				i %= n;
@@ -105,15 +107,15 @@ library Punycode {
 				i += 1;
 			}
 			// 3. encode codepoints as utf8
-			len = 0;
 			assembly {
-				ret := add(v, 32)
+				p := add(v, 32)
 			}
 			for (i = 0; i < n; i += 1) {
-				len = writeUTF8(ret, len, v[i]); // encode
+				p = writeUTF8(p, v[i]); // encode
 			}
 			assembly {
-				mstore(ret, len) // truncate
+				mstore(v, sub(p, add(v, 32))) // truncate
+				ret := v // reuse memory
 			}
 		}
 	}
@@ -138,28 +140,37 @@ library Punycode {
 
 	// write codepoint as utf8 into buf at pos
 	// return new pos
-	function writeUTF8(bytes memory buf, uint256 pos, uint256 cp) internal pure returns (uint256) {
-		unchecked {
-			if (cp < 0x800) {
-				if (cp < 0x80) {
-					buf[pos++] = bytes1(uint8(cp));
-				} else {
-					buf[pos++] = bytes1(uint8(0xC0 | (cp >> 6)));
-					buf[pos++] = bytes1(uint8(0x80 | (cp & 0x3F)));
-				} 
+	function writeUTF8(uint256 ptr, uint256 cp) internal pure returns (uint256 dst) {
+		if (cp < 0x800) {
+			if (cp < 0x80) {
+				assembly {
+					mstore8(ptr, cp)
+					dst := add(ptr, 1)
+				}
 			} else {
-				if (cp < 0x10000) {
-					buf[pos++] = bytes1(uint8(0xE0 | (cp >> 12)));
-					buf[pos++] = bytes1(uint8(0x80 | ((cp >> 6) & 0x3F)));
-					buf[pos++] = bytes1(uint8(0x80 | (cp & 0x3F)));
-				} else {
-					buf[pos++] = bytes1(uint8(0xF0 | (cp >> 18)));
-					buf[pos++] = bytes1(uint8(0x80 | ((cp >> 12) & 0x3F)));
-					buf[pos++] = bytes1(uint8(0x80 | ((cp >> 6) & 0x3F)));
-					buf[pos++] = bytes1(uint8(0x80 | (cp & 0x3F)));
+				assembly {
+					mstore8(ptr,         or(0xC0, shr(6, cp)))
+					mstore8(add(ptr, 1), or(0x80, and(cp, 0x3F)))
+					dst := add(ptr, 2)
+				}
+			} 
+		} else {
+			if (cp < 0x10000) {
+				assembly {
+					mstore8(ptr,         or(0xE0,     shr(12, cp)))
+					mstore8(add(ptr, 1), or(0x80, and(shr( 6, cp), 0x3F)))
+					mstore8(add(ptr, 2), or(0x80, and(        cp,  0x3F)))
+					dst := add(ptr, 3)
+				}
+			} else {
+				assembly {
+					mstore8(ptr,         or(0xF0,     shr(18, cp)))
+					mstore8(add(ptr, 1), or(0x80, and(shr(12, cp), 0x3F)))
+					mstore8(add(ptr, 2), or(0x80, and(shr( 6, cp), 0x3F)))
+					mstore8(add(ptr, 3), or(0x80, and(        cp,  0x3F)))
+					dst := add(ptr, 4)
 				}
 			}
-			return pos;
 		}
 	}
 

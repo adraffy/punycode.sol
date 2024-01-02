@@ -1,7 +1,7 @@
 import {puny_decoded, puny_encoded, is_surrogate} from '@adraffy/punycode';
 import {readFileSync, writeFileSync} from 'node:fs';
 
-const VERSION = readFileSync(new URL('../src/Punycode.sol', import.meta.url), {encoding: 'utf8'}).match(/pragma solidity (.*);/m)[1];
+const VERSION = readFileSync(new URL('../src/Impl.sol', import.meta.url), {encoding: 'utf8'}).match(/pragma solidity (.*);/m)[1];
 
 console.log(VERSION);
 
@@ -65,7 +65,7 @@ function write_test_file(name, recs) {
 pragma solidity ${VERSION};
 
 import {Test} from "forge-std/Test.sol";
-import {Punycode} from "../src/Punycode.sol";
+import {Punycode} from "../src/Impl.sol";
 
 contract Test_${name} is Test {
 ${recs.map(({unicode, punycode, comment, error}) => `

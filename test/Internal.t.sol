@@ -2,7 +2,7 @@
 pragma solidity ^0.8.23;
 
 import {Test} from "forge-std/Test.sol";
-import {Punycode} from "../src/Punycode.sol";
+import {Punycode} from "../src/Impl.sol";
 
 contract Test_Internal is Test {
 
@@ -234,13 +234,16 @@ contract Test_Internal is Test {
 	}
 
 	function str_from_cps(uint256[] memory cps, uint256 len) internal pure returns (string memory) {
-		bytes memory v = new bytes(4 * len);
-		uint256 n;
+		bytes memory v = new bytes(len << 2);
+		uint256 p;
+		assembly {
+			p := add(v, 32)
+		}
 		for (uint256 i; i < len; i++) {
-			n = Punycode.writeUTF8(v, n, cps[i]);
+			p = Punycode.writeUTF8(p, cps[i]);
 		}
 		assembly {
-			mstore(v, n)
+			mstore(v, sub(p, add(v, 32)))
 		}
 		return string(v);
 	}

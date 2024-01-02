@@ -2,8 +2,7 @@
 pragma solidity ^0.8.23;
 
 import {Script, console2} from "forge-std/Script.sol";
-import {Punycode} from "../src/Punycode.sol";            // Gas used: 4310752
-//import {Punycode} from "../src/PunycodeWithArray.sol"; // Gas used: 4682790
+import {Punycode} from "../src/Impl.sol";
 
 contract Gas is Script {
 
