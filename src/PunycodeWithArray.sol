@@ -120,24 +120,6 @@ library Punycode {
 		}
 	}
 	
-	function slice(bytes memory src, uint256 pos, uint256 len) internal pure returns (bytes memory ret) {
-		ret = new bytes(len);
-		uint256 ptr;
-		uint256 end;
-		assembly {
-			src := add(src, add(pos, 32))
-			ptr := add(ret, 32)
-			end := add(ptr, len)
-		}
-		while (ptr < end) {
-			assembly {
-				mstore(ptr, mload(src))
-				ptr := add(ptr, 32)
-				src := add(src, 32)
-			}
-		}
-	}
-
 	// write codepoint as utf8 into buf at pos
 	// return new pos
 	function writeUTF8(uint256 ptr, uint256 cp) internal pure returns (uint256 dst) {
@@ -170,6 +152,24 @@ library Punycode {
 					mstore8(add(ptr, 3), or(0x80, and(        cp,  0x3F)))
 					dst := add(ptr, 4)
 				}
+			}
+		}
+	}
+
+	function slice(bytes memory src, uint256 pos, uint256 len) internal pure returns (bytes memory ret) {
+		ret = new bytes(len);
+		uint256 ptr;
+		uint256 end;
+		assembly {
+			src := add(src, add(pos, 32))
+			ptr := add(ret, 32)
+			end := add(ptr, len)
+		}
+		while (ptr < end) {
+			assembly {
+				mstore(ptr, mload(src))
+				ptr := add(ptr, 32)
+				src := add(src, 32)
 			}
 		}
 	}
