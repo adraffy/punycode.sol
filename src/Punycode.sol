@@ -98,7 +98,6 @@ library Punycode {
 			uint256 bias = BIAS;
 			uint256 cp = MIN_CP;
 			uint256 i;
-			p = 1;
 			while (start < end) {
 				uint256 prev = i;
 				uint256 w = 1;
@@ -115,8 +114,7 @@ library Punycode {
 					w *= BASE - t;
 				}
 				n += 1;
-				bias = adaptBias(i - prev, n, p == 1);
-				p = 0;
+				bias = adaptBias(i - prev, n, prev == 0);
 				cp += i / n;
 				require(cp >= MIN_CP && cp <= MAX_CP, "invalid");
 				i %= n;
