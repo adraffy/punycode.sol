@@ -4,6 +4,30 @@ pragma solidity ^0.8.23;
 
 library Punycode {
 
+	// convenience
+	function decode(string memory puny) internal pure returns (string memory uni) {
+		uint256 src;
+		uint256 len;
+		assembly {
+			len := mload(puny)
+			src := add(puny, 32)
+		}
+		(uint256 dst, ) = decode(src, len);
+		if (src == dst) return puny; // unchanged
+		assembly { uni := sub(dst, 32) }
+	}
+	function encode(string memory uni) external pure returns (string memory puny) {
+		uint256 src;
+		uint256 len;
+		assembly {
+			len := mload(uni)
+			src := add(uni, 32)
+		}
+		(uint256 dst, ) = encode(src, len);
+		if (src == dst) return uni; // unchanged
+		assembly { puny := sub(dst, 32) }
+	}
+
 	// https://datatracker.ietf.org/doc/html/rfc3492#section-5
 	uint256 constant BASE = 36; // 10 + 26
 	uint256 constant BIAS = 72;
@@ -18,20 +42,26 @@ library Punycode {
 
 	// "A decoder MUST recognize the letters in both uppercase and lowercase forms (including mixtures of both forms)."
 	// returns [0, BASE) as success, BASE as error
-	function basicFromChar(uint256 ch) internal pure returns (uint256) {
+	function toBase(uint256 ch) internal pure returns (uint256) {
 		unchecked {
-			if (ch <= 90) { 
+			if (ch <= 90) {
 				if (ch >= 65) {
 					return ch - 65; // [A-Z] => 0-25
 				} else if (ch >= 48 && ch <= 57) {
 					return ch - 22; // [0-9] => 26-35, 48-26=22
-				} 
+				}
 			} else if (ch >= 97 && ch <= 122) {
 				return ch - 97; // [a-z] => 0-25
 			}
 			return BASE;
 		}
 	}
+	// "An encoder SHOULD output only uppercase forms or only lowercase forms"
+	// returns "a-z0-9"
+	function fromBase(uint256 i) internal pure returns (uint256) {
+		return i < 26 ? 97 + i : 22 + i;
+	}
+
 
 	// https://datatracker.ietf.org/doc/html/rfc3492#section-6.1
 	function adaptBias(uint256 delta, uint256 len, bool first) internal pure returns (uint256) {
@@ -46,15 +76,19 @@ library Punycode {
 			return k + ((1 + SHIFT_BASE) * delta / (delta + SKEW));
 		}
 	}
-
-	// convenience
-	function decode(string memory s) internal pure returns (string memory) {
-		return string(decode(bytes(s), 0, bytes(s).length));
+	function trimBias(uint256 k, uint256 bias) internal pure returns (uint256) {
+		unchecked {
+			if (k > bias) {
+				uint256 delta = k - bias;
+				return delta >= T_MAX ? T_MAX : delta;
+			} else {
+				return T_MIN;
+			}
+		}
 	}
 
-	// always returns a copy
 	// https://datatracker.ietf.org/doc/html/rfc3492#section-6.2
-	function decode(bytes memory src, uint256 start, uint256 len) internal pure returns (bytes memory ret) {
+	function decode(uint256 src, uint256 src_len) internal pure returns (uint256 dst, uint256 dst_len) {
 		unchecked {
 			// 1. find last hyphen
 			//
@@ -69,123 +103,184 @@ library Punycode {
 			//                 ^start    ^last-hyphen 
 			//     => initial string = "abcde12345" (n = 10)
 			//
-			// load ascii directly:
-			// |--------- 256 ---------|-----------------------+-->
-			// |61|62|63|64|65|31|32|33|34|35|  |  |  |  |  |  | uint32[]
-			// +-----------------------+-----------------------+-->
-			if (len < 4 || bytes4(src) != "xn--") return slice(src, start, len);
-			ret = new bytes(len << 2);
-			uint256 end = start + len;
+			require(isASCII(src, src_len), "ascii");
+			if (src_len < 4) return (src, src_len); // too short
+			uint256 temp;
+			assembly { temp := shr(224, mload(src)) }
+			if ((temp & 0x2D2D) != 0x2D2D) return (src, src_len); // doesnt match: /^.{2}--/
+			require(toBase(temp >> 24) == 23 && toBase((temp >> 16) & 0xFF) == 13, "extension"); // doesnt match: /^xn/i
+			assembly {
+				dst := add(mload(64), 32)
+				mstore(64, add(dst, shl(2, src_len))) // cps = new uint32[](src_len)
+			}
+			uint256 end = src + src_len;
+			src += 4; // skip "xn--"
 			uint256 n; // number of codepoints
 			uint256 p = end; // work backwards
-			start += 4; // len("xn--")
-			while (p > start) { 
-				if (src[--p] == '-') { // found it
-					n = p - start; // before hyphen
-					uint256 align = 3; // ascii -> uint32 => 000X
-					while (start < p) {
-						bytes1 ch = src[start];
-						require(uint8(ch) < MIN_CP, "ascii");
-						ret[align] = ch;
-						align += 4;
-						start += 1;
+			while (p > src) {
+				p -= 1;
+				assembly { temp := shr(248, mload(p)) } // read byte
+				if (temp == 0x2D) { // found it
+					n = p - src; // before hyphen
+					assembly { temp := add(dst, 3) } // lsb alignment in uint32
+					while (src < p) {
+						assembly { mstore8(temp, shr(248, mload(src))) } // cps[i] = cp
+						temp += 4;
+						src += 1;
 					}
-					start = p + 1; // skip hyphen
+					src += 1; // skip hyphen
 					break;
 				}
 			}
-			// 2. decode codepoints
+			// 2. decode punycode to codepoints
 			uint256 bias = BIAS;
 			uint256 cp = MIN_CP;
 			uint256 i;
-			while (start < end) {
+			while (src < end) {
 				uint256 prev = i;
 				uint256 w = 1;
 				uint256 k;
 				while (true) {
-					require(start < end, "overflow");
-					uint256 basic = basicFromChar(uint8(src[start]));
-					require(basic < BASE, "basic");
-					start += 1;
-					i += basic * w;
+					require(src < end, "overflow");
+					assembly { temp := shr(248, mload(src)) } // read byte
+					temp = toBase(temp);
+					require(temp != BASE, "not basic");
+					src += 1;
+					i += temp * w;
 					k += BASE;
-					uint256 t = k > bias ? min(T_MAX, k - bias) : T_MIN;
-					if (basic < t) break;
+					uint256 t = trimBias(k, bias);
+					if (temp < t) break;
 					w *= BASE - t;
 				}
 				n += 1;
-				bias = adaptBias(i - prev, n, prev == 0);
 				cp += i / n;
-				require(cp >= MIN_CP && cp <= MAX_CP, "invalid");
+				require(cp <= MAX_CP, "invalid");
+				bias = adaptBias(i - prev, n, prev == 0);
 				i %= n;
-				// insert codepoint at i = 2:
-				// <---------------------------- n ---------------------------->
-				// +-----------------------+-----------------------+-----------------------+
-				// |61|62|63|64|65|66|67|68|69|6A|6B|6C|6D|6E|6F|70|71|72|73|74|           | uint32[]
-				// +-----------------------+-----------------------+-----------------------+
-				//       ^head                         ^tail
-				//       |-------- save ---------|
-				//
-				// work backwards, move tail right by 4 bytes:
-				//                                     |-----------------------|
-				//                                     >>>|-----------------------|
-				// keep moving until we pass head:
-				//             |-----------------------|
-				//             >>>|-----------------------|
-				// 
-				// at head, combine inserted cp with truncated save:
-				//        <<<<<<<<<<<<<<<<<<| cp |
-				//        | cp |-------- save ---|xx|
-		        // +-----------------------+-----------------------+-----------------------+
-				// |61|62|__|63|64|65|66|67|68|69|6A|6B|6C|6D|6E|6F|70|71|72|73|74|        |
-				// +-----------------------+-----------------------+-----------------------+
-				uint256 head;
-				uint256 save;
-				uint256 tail;
-				assembly {
-					head := add(add(ret, 32), shl(2, i)) 
-					save := mload(head) 
-					tail := add(ret, shl(2, n))
-				}
-				while (head <= tail) { // work backwards
-					assembly {
-						mstore(add(tail, 4), mload(tail)) // shift right
-					}
-					tail -= 32;
-				}
-				assembly {
-					mstore(head, or(shl(224, cp), shr(32, save))) // insert
-				}
+				insertUint32(dst, i, n - i - 1, cp); // cps.splice(i, 0, cp)
 				i += 1;
 			}
 			// 3. encode codepoints as utf8
-			// input: codepoints     uint32[] = { 61, A9, 904, 1F4A9 }
-            //     61 => [61]                     |   |    |      \ 
-			//     A9 => [C2 A9]                  |   |    |       \ 
-			//    904 => [E0 A4 84]               |   |    |\___    |\______
-			//  1F4A9 => [F0 9F 92 A9]            |  / \   |    \   |       \
-			// output: utf8 bytes       bytes = [61 C2 A9 E0 A4 84 F0 9F 92 A9]
-			assembly {
-				start := ret
+			assembly { p := dst }
+			i = p;
+			end = p + (n << 2);
+			while (i < end) {
+				assembly { temp := shr(224, mload(i)) } // read uint32
+				p = writeUTF8(p, temp);
+				i += 4;
 			}
-			p = start + 32;
-			end = start + (n << 2);
-			while (start < end) {
-				start += 4;
-				assembly {
-					cp := and(mload(start), 0xFFFFFFFF) // read uint32
+			dst_len = p - dst;
+			assembly { mstore(sub(dst, 32), dst_len) } // truncate
+		}
+	}
+	function insertUint32(uint256 ptr, uint256 index, uint256 above, uint256 value) internal pure {
+		uint256 head = ptr + (index << 2); // insertion
+		uint256 save;
+		assembly { save := mload(head) }
+		if (above >= 8) { // move everything 4 bytes to the right
+			uint256 tail = head + ((above - 8) << 2);
+			while (tail >= head) { // work backwards
+				assembly { mstore(add(tail, 4), mload(tail)) }
+				tail -= 32;
+			} 
+		}
+		assembly { mstore(head, or(shl(224, value), shr(32, save))) } // insert uint32
+	}
+
+	// https://datatracker.ietf.org/doc/html/rfc3492#section-6.3
+	function encode(uint256 src, uint256 src_len) internal pure returns (uint256 dst, uint256 dst_len) {
+		if (isASCII(src, src_len)) return (src, src_len);
+		uint32[] memory cps = new uint32[](src_len);
+		uint256 dst_ptr;
+		assembly {
+			dst := add(mload(64), 32)
+			mstore(64, add(dst, add(5, shl(2, src_len)))) // new bytes("xn---" + src_len*4)
+			mstore(dst, 'xn------------------------------')
+			dst_ptr := add(dst, 4) // skip "xn--"
+		}
+		uint256 end = src + src_len;
+		uint256 cp;
+		uint256 cps_len;
+		while (src < end) {
+			(src, cp) = readUTF8(src);
+			if (cp < MIN_CP) {
+				assembly { mstore8(dst_ptr, cp) } // write byte
+				dst_ptr += 1;
+			} else {
+				cps[cps_len] = uint32(cp); // save codepoint
+			}
+			cps_len += 1;
+		}
+		end = dst_ptr - dst - 3; 
+		if (end > 1) { // add "-" since we have some ascii
+			assembly { mstore8(dst_ptr, 0x2D) } // write byte
+			dst_ptr += 1;
+		}
+		uint256 cp0 = MIN_CP;
+		uint256 bias = BIAS;
+		uint256 delta;
+		uint256 pos = end;
+		while (pos <= cps_len) {
+			uint256 cp1 = MAX_CP;
+			for (uint256 i; i < cps_len; i += 1) { // find next highest cp
+				cp = cps[i];
+				if (cp >= cp0 && cp < cp1) cp1 = cp;
+			}
+			delta += (cp1 - cp0) * pos;
+			for (uint256 i; i < cps_len; i += 1) {
+				cp = cps[i];
+				if (cp < cp1) {
+					delta += 1;
+				} else if (cp == cp1) {
+					dst_ptr = writePunycode(dst_ptr, delta, bias);
+					bias = adaptBias(delta, pos, pos == end);
+					delta = 0;
+					pos += 1;
 				}
-				p = writeUTF8(p, cp); // encode
 			}
-			assembly {
-				mstore(ret, sub(p, add(ret, 32))) // truncate
+			delta += 1;
+			cp0 = cp1 + 1;
+		}
+		assembly { mstore(sub(dst, 32), sub(dst_ptr, dst)) } // truncate
+	}
+	function writePunycode(uint256 ptr, uint256 delta, uint256 bias) internal pure returns (uint256) {
+		unchecked {
+			uint256 k = BASE;
+			while (true) {
+				uint256 t = trimBias(k, bias);
+				if (delta < t) break;
+				uint256 delta_t = delta - t;
+				uint256 base_t = BASE - t;
+				ptr = writeUTF8(ptr, fromBase(t + (delta_t % base_t)));
+				delta = delta_t / base_t;
+				k += BASE;
+			}	
+			return writeUTF8(ptr, fromBase(delta));
+		}
+	}
+
+	// read one utf8 codepoint (1-4 bytes) from memory at ptr
+	function readUTF8(uint256 ptr) internal pure returns (uint256 dst, uint256 cp) {
+		unchecked {
+			// 0xxxxxxx => 1 :: 0aaaaaaa ???????? ???????? ???????? =>                   0aaaaaaa
+			// 110xxxxx => 2 :: 110aaaaa 10bbbbbb ???????? ???????? =>          00000aaa aabbbbbb
+			// 1110xxxx => 3 :: 1110aaaa 10bbbbbb 10cccccc ???????? => 000000aa aaaabbbb bbcccccc
+			// 11110xxx => 4 :: 11110aaa 10bbbbbb 10cccccc 10dddddd => 000aaabb bbbbcccc ccdddddd
+			uint256 temp;
+			assembly { temp := shr(224, mload(ptr)) } // read uint32
+			if (temp < 0x80000000) {
+				return (ptr + 1, temp >> 24);
+			} else if (temp < 0xE0000000) {
+				return (ptr + 2, ((temp & 0x1F000000) >> 18) | ((temp & 0x3F0000) >> 16));
+			} else if (temp < 0xF0000000) {
+				return (ptr + 3, ((temp & 0x0F000000) >> 12) | ((temp & 0x3F0000) >> 10) | ((temp & 0x3F00) >> 8));
+			} else {
+				return (ptr + 4, ((temp & 0x07000000) >>  6) | ((temp & 0x3F0000) >>  4) | ((temp & 0x3F00) >> 2) | (temp & 0x3F));
 			}
 		}
 	}
 
-	// write codepoint as utf8 into buf at pos
-	// uses pointers to avoid bound checks
-	// return new pos
+	// write codepoint as utf8 at ptr
 	function writeUTF8(uint256 ptr, uint256 cp) internal pure returns (uint256 dst) {
 		if (cp < 0x800) {
 			if (cp < 0x80) {
@@ -220,26 +315,19 @@ library Punycode {
 		}
 	}
 
-	function slice(bytes memory src, uint256 pos, uint256 len) internal pure returns (bytes memory ret) {
-		ret = new bytes(len);
-		uint256 ptr;
-		uint256 end;
-		assembly {
-			src := add(src, add(pos, 32))
-			ptr := add(ret, 32)
-			end := add(ptr, len)
-		}
-		while (ptr < end) {
-			assembly {
-				mstore(ptr, mload(src))
-				ptr := add(ptr, 32)
-				src := add(src, 32)
+	// fast check for ascii
+	uint256 constant ASCII_MASK = 0x8080808080808080808080808080808080808080808080808080808080808080;
+	function isASCII(uint256 ptr, uint256 len) internal pure returns (bool) {
+		unchecked {
+			uint256 end = ptr + len;
+			while (ptr < end) {
+				uint256 temp;
+				assembly { temp := mload(ptr) }
+				ptr += 32;
+				if (temp & (ptr > end ? (ASCII_MASK << ((ptr - end) << 3)) : ASCII_MASK) != 0) return false;
 			}
+			return true;
 		}
-	}
-
-	function min(uint256 a, uint256 b) internal pure returns (uint256) {
-		return a < b ? a : b;
 	}
 
 }

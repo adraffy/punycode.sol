@@ -1,4 +1,4 @@
-// generated 2024-01-02T05:11:02.706Z
+// generated 2024-01-05T06:09:30.053Z
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.23;
 
@@ -6,45 +6,79 @@ import {Test} from "forge-std/Test.sol";
 import {Punycode} from "../src/Impl.sol";
 
 contract Test_Custom is Test {
-
-	function test_empty() public { // empty string
-		assertEq(unicode"", Punycode.decode(unicode""));
+	
+	// empty string
+	function test_decode_empty() public {
+		assertEq("", Punycode.decode(""));
 	}
-
-	function test_0123456789_abcdefghijklmnopqrstuvwxyz() public { // basic ascii
-		assertEq(unicode"0123456789-abcdefghijklmnopqrstuvwxyz", Punycode.decode(unicode"0123456789-abcdefghijklmnopqrstuvwxyz"));
+	function test_encode_empty() public {
+		assertEq(Punycode.encode(""), "");
 	}
-
-	function testFail_xn__u1F4A9() public { // error: expected ASCII
-		assertEq(unicode"<invalid>", Punycode.decode(unicode"xn--💩"));
+	
+	// basic ascii
+	function test_decode_0123456789_abcdefghijklmnopqrstuvwxyz() public {
+		assertEq("0123456789-abcdefghijklmnopqrstuvwxyz", Punycode.decode("0123456789-abcdefghijklmnopqrstuvwxyz"));
 	}
-
-	function testFail_xn__0() public { // error: invalid encoding
-		assertEq(unicode"<invalid>", Punycode.decode(unicode"xn--0"));
+	function test_encode_0123456789_abcdefghijklmnopqrstuvwxyz() public {
+		assertEq(Punycode.encode("0123456789-abcdefghijklmnopqrstuvwxyz"), "0123456789-abcdefghijklmnopqrstuvwxyz");
 	}
-
-	function test_xn__maana_pta() public { // nodejs example #1
-		assertEq(unicode"mañana", Punycode.decode(unicode"xn--maana-pta"));
+	
+	// error: expected ASCII
+	function testFail_decode_xn__u1F4A9() public {
+		assertEq("<invalid>", Punycode.decode(unicode"xn--💩"));
 	}
-
-	function test_xn____dqo34k() public { // nodejs example #2
-		assertEq(unicode"☃-⌘", Punycode.decode(unicode"xn----dqo34k"));
+	
+	// error: invalid encoding
+	function testFail_decode_xn__0() public {
+		assertEq("<invalid>", Punycode.decode("xn--0"));
 	}
-
-	function test_xn__ls8h() public { // unstyled poop
-		assertEq(unicode"💩", Punycode.decode(unicode"xn--ls8h"));
+	
+	// nodejs example #1
+	function test_decode_xn__maana_pta() public {
+		assertEq(unicode"mañana", Punycode.decode("xn--maana-pta"));
 	}
-
-	function test_xn__v86cw764b() public { // emoji-style poop
-		assertEq(unicode"💩️", Punycode.decode(unicode"xn--v86cw764b"));
+	function test_encode_xn__maana_pta() public {
+		assertEq(Punycode.encode(unicode"mañana"), "xn--maana-pta");
 	}
-
-	function test_xn__u86cy764b() public { // text-style poop
-		assertEq(unicode"💩︎", Punycode.decode(unicode"xn--u86cy764b"));
+	
+	// nodejs example #2
+	function test_decode_xn____dqo34k() public {
+		assertEq(unicode"☃-⌘", Punycode.decode("xn----dqo34k"));
 	}
-
-	function testFail_xn__8c9by4f() public { // surrogate poop
-		assertEq(unicode"💩", Punycode.decode(unicode"xn--8c9by4f"));
+	function test_encode_xn____dqo34k() public {
+		assertEq(Punycode.encode(unicode"☃-⌘"), "xn----dqo34k");
+	}
+	
+	// unstyled poop
+	function test_decode_xn__ls8h() public {
+		assertEq(unicode"💩", Punycode.decode("xn--ls8h"));
+	}
+	function test_encode_xn__ls8h() public {
+		assertEq(Punycode.encode(unicode"💩"), "xn--ls8h");
+	}
+	
+	// emoji-style poop
+	function test_decode_xn__v86cw764b() public {
+		assertEq(unicode"💩️", Punycode.decode("xn--v86cw764b"));
+	}
+	function test_encode_xn__v86cw764b() public {
+		assertEq(Punycode.encode(unicode"💩️"), "xn--v86cw764b");
+	}
+	
+	// text-style poop
+	function test_decode_xn__u86cy764b() public {
+		assertEq(unicode"💩︎", Punycode.decode("xn--u86cy764b"));
+	}
+	function test_encode_xn__u86cy764b() public {
+		assertEq(Punycode.encode(unicode"💩︎"), "xn--u86cy764b");
+	}
+	
+	// surrogate poop
+	function testFail_decode_xn__8c9by4f() public {
+		assertEq(unicode"💩", Punycode.decode("xn--8c9by4f"));
+	}
+	function testFail_encode_xn__8c9by4f() public {
+		assertEq(Punycode.encode(unicode"💩"), "xn--8c9by4f");
 	}
 
 }

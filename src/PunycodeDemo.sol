@@ -10,4 +10,8 @@ contract PunycodeDemo {
 		return Punycode.decode(s);
 	}
 
+	function encode(string memory s) external pure returns (string memory) {
+		return Punycode.encode(s);
+	}
+
 }

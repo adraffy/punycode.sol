@@ -15,7 +15,7 @@ labels = labels.filter(s => !/^[\x00-\x7F]+$/i.test(s));
 console.log(`Non-ASCII: ${labels.length}`);
 
 let sample = new Set();
-while (sample.size < 4000) {
+while (sample.size < 2000) {
 	sample.add(labels[labels.length * Math.random()|0]);
 }
 writeFileSync(new URL('./data/ENS.json', import.meta.url), JSON.stringify([...sample], null, '\t'));

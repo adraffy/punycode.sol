@@ -4,7 +4,7 @@ pragma solidity ^0.8.23;
 import {Script, console2} from "forge-std/Script.sol";
 import {Punycode} from "../src/Impl.sol";
 
-contract Gas is Script {
+contract GasDecode is Script {
 
 	// longest dns label possible:
 	// len(encode("{10000}")) = 8 bytes, for 1 codepoint

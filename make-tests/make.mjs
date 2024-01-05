@@ -23,25 +23,23 @@ function write_test_file(name, recs) {
 		recs = JSON.parse(readFileSync(recs));
 	}
 	recs = recs.map(x => {
-		if (typeof x === 'string') {
+		if (is_str(x)) {
 			x = {unicode: x};
 		}
 		if (x.error) {
-			if (!x.unicode) {
+			if (!is_str(x.unicode)) {
 				let res;
 				try {
 					res = puny_decoded(x.punycode);
 				} catch (err) {
 					x.comment = `error: ${err.message}`;
-					x.unicode = '<invalid>';
 				}
 				if (res) {
 					console.log(x);
 					throw new Error('Expected fail');
 				}
 			}
-		} 
-		if (typeof x.unicode !== 'string') {
+		} else if (!is_str(x.unicode)) {
 			try {
 				x.unicode = puny_decoded(x.punycode).map(x => is_surrogate(x) ? `\\u${x.toString(16).padStart(4, '0')}`: String.fromCodePoint(x)).join('');
 			} catch (err) {
@@ -49,7 +47,7 @@ function write_test_file(name, recs) {
 				throw err;
 			}
 		} 
-		if (typeof x.punycode !== 'string') {
+		if (!is_str(x.punycode)) {
 			x.punycode = puny_encoded(x.unicode); // never fails
 		}
 		let prior = map.get(x.punycode);
@@ -60,6 +58,29 @@ function write_test_file(name, recs) {
 		map.set(x.punycode, x);
 		return x;
 	});
+	let lines = [];
+	for (let {unicode, punycode, comment, error} of recs) {
+		lines.push('');
+		if (comment) lines.push(`// ${comment}`);
+		let id = safe_identifier(punycode);
+		lines.push(
+			`function test${error ? 'Fail' : ''}_decode_${id}() public {`,
+			`	assertEq(${solidity_qq(is_str(unicode) ? unicode : '<invalid>')}, Punycode.decode(${solidity_qq(punycode)}));`,
+			`}`
+		);
+		if (is_str(unicode)) {
+			let pos = punycode.lastIndexOf('-');
+			if (pos >= 0) {
+				// lowercase the punycode part since we don't have case-insensitive compare
+				punycode = punycode.slice(0, pos) + punycode.slice(pos).replaceAll(/[A-Z]+/g, x => x.toLowerCase());
+			}
+			lines.push(
+				`function test${error ? 'Fail' : ''}_encode_${id}() public {`,
+				`	assertEq(Punycode.encode(${solidity_qq(unicode)}), ${solidity_qq(punycode)});`,
+				`}`
+			);
+		}
+	}
 	let code = `// generated ${new Date().toISOString()}
 // SPDX-License-Identifier: MIT
 pragma solidity ${VERSION};
@@ -68,10 +89,7 @@ import {Test} from "forge-std/Test.sol";
 import {Punycode} from "../src/Impl.sol";
 
 contract Test_${name} is Test {
-${recs.map(({unicode, punycode, comment, error}) => `
-	function test${error ? 'Fail' : ''}_${safe_identifier(punycode)}() public {${comment ? ` // ${comment}` : ''}
-		assertEq(unicode"${unicode}", Punycode.decode(unicode"${punycode}"));
-	}\n`).join('')}
+${lines.map(x => `\t${x}\n`).join('')}
 }`;
 	let file = new URL(`../test/${name}.t.sol`, import.meta.url);
 	writeFileSync(file, code);
@@ -80,4 +98,10 @@ ${recs.map(({unicode, punycode, comment, error}) => `
 
 function safe_identifier(s) {
 	return s.replaceAll('-', '_').replaceAll(/[^a-z0-9_]/uig, x => `u${x.codePointAt(0).toString(16).toUpperCase().padStart(0, 4)}`) || 'empty';
+}
+function solidity_qq(s) {
+	return `${/^[\x20-\x7F]*$/i.test(s) ? '' : 'unicode'}"${s}"`;
+}
+function is_str(s) {
+	return typeof s === 'string';
 }
