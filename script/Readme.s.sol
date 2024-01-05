@@ -7,11 +7,10 @@ import {Punycode} from "../src/Impl.sol";
 
 contract Readme is Script {
 
-	function run() public pure {
-		decode_slice();
-	}
+	function run() public pure {		
+		console2.log(Punycode.decode("xn--ls8h"));
+		console2.log(Punycode.encode(unicode"💩"));
 
-	function decode_slice() internal pure {
 		string memory s = "abc.xn--ls8h.com";
 		uint256 src;
 		assembly { src := add(s, 32) }

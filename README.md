@@ -27,6 +27,7 @@ Lower-level functions:
 function decode(uint256 src, uint256 src_len) pure returns (uint256 dst, uint256 dst_len)
 function encode(uint256 src, uint256 src_len) pure returns (uint256 dst, uint256 dst_len)
 
+// example
 string memory s = "abc.xn--ls8h.com";
 uint256 src;
 assembly { src := add(s, 32) }
