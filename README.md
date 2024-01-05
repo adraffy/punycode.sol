@@ -22,8 +22,8 @@ function encode(string memory s) pure returns (string memory)
 
 Lower-level functions:
 ```solidity
-// dst == src if no encoding required
-// otherwise, (src-32) is castable to bytes
+// src == dst if no encoding required
+// otherwise, (dst-32) is effectively `bytes`
 function decode(uint256 src, uint256 src_len) pure returns (uint256 dst, uint256 dst_len)
 function encode(uint256 src, uint256 src_len) pure returns (uint256 dst, uint256 dst_len)
 
@@ -42,7 +42,7 @@ console2.logBytes32(h); // 0xba967c160905ade030f84952644a963994eeaed3881a6b8a4e9
 
 ## Build
 
-1. Edit: [Impl.sol](./src/Impl.sol)
+<!-- 1. Edit: [Impl.sol](./src/Impl.sol) -->
 1. `forge test` — run [tests](./test/)
 	* ⚠️ might take a moment to compile the ENS tests
 1. `forge script GasEncode` — estimate gas for `encode()`
