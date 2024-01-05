@@ -90,19 +90,9 @@ library Punycode {
 	// https://datatracker.ietf.org/doc/html/rfc3492#section-6.2
 	function decode(uint256 src, uint256 src_len) internal pure returns (uint256 dst, uint256 dst_len) {
 		unchecked {
-			// 1. find last hyphen
-			//
-			// 1a. verbatim: "abc" => not punycode
-			// 
-			// 1b. pure: "xn--<encoded>"
-			//                ^start
-			//               ^last-hyphen (before start)
-			//     => initial string = "" (n = 0)
-			//
-			// 1c. mixed: "xn--abcde12345-<encoded>"
-			//                 ^start    ^last-hyphen 
-			//     => initial string = "abcde12345" (n = 10)
-			//
+			// verbatim: "abc"
+			// pure:     "xn--<encoded>"
+			// mixed:    "xn--abc-<encoded>"
 			require(isASCII(src, src_len), "ascii");
 			if (src_len < 4) return (src, src_len); // too short
 			uint256 temp;
@@ -116,6 +106,7 @@ library Punycode {
 			uint256 end = src + src_len;
 			src += 4; // skip "xn--"
 			uint256 n; // number of codepoints
+			// 1. find last hyphen
 			uint256 p = end; // work backwards
 			while (p > src) {
 				p -= 1;
@@ -191,13 +182,12 @@ library Punycode {
 	function encode(uint256 src, uint256 src_len) internal pure returns (uint256 dst, uint256 dst_len) {
 		if (isASCII(src, src_len)) return (src, src_len);
 		uint32[] memory cps = new uint32[](src_len);
-		uint256 dst_ptr;
 		assembly {
 			dst := add(mload(64), 32)
 			mstore(64, add(dst, add(5, shl(2, src_len)))) // new bytes("xn---" + src_len*4)
 			mstore(dst, 'xn------------------------------')
-			dst_ptr := add(dst, 4) // skip "xn--"
 		}
+		uint256 dst_ptr = dst + 4; // skip "xn--"
 		uint256 end = src + src_len;
 		uint256 cp;
 		uint256 cps_len;

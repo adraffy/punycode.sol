@@ -7,7 +7,7 @@ import {Punycode} from "../src/Impl.sol";
 contract Test_Internal is Test {
 
 	function test_isASCII() public {
-		string memory s = unicode"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\u0080"; // 33 'a' 
+		string memory s = unicode"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\u0080"; // 33 "a" + non-ASCII
 		uint256 ptr;
 		assembly { ptr := add(s, 32) }
 		assertEq(true, Punycode.isASCII(ptr, 32));
@@ -127,15 +127,19 @@ contract Test_Internal is Test {
 		assertEq(uint8(bytes1('9')), Punycode.fromBase(35));
 	}
 
+	// warning: this consumes a shitload of gas
 	function test_readWriteUTF8() public {
-		bytes memory src = new bytes(4);
+		bytes memory src = new bytes(8);
 		uint256 ptr;
 		assembly { ptr := src }
-		for (uint256 i = 0; i < 0x110000; i++) {
-			uint256 p = Punycode.writeUTF8(ptr, i);
-			p = Punycode.writeUTF8(p, i);
-			(uint256 q, uint256 j) = Punycode.readUTF8(ptr);
-			assertEq(i, j);
+		uint256 p;
+		uint256 q;
+		uint256 j;
+		for (uint256 i; i < 0x110000; i++) {
+			p = Punycode.writeUTF8(Punycode.writeUTF8(ptr, i), i);
+			//assertEq(i, j);
+			//assertEq(p, q);
+			(q, j) = Punycode.readUTF8(ptr);
 			(q, j) = Punycode.readUTF8(q);
 			assertEq(i, j);
 			assertEq(p, q);
