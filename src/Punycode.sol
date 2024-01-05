@@ -44,16 +44,15 @@ library Punycode {
 	// returns [0, BASE) as success, BASE as error
 	function toBase(uint256 ch) internal pure returns (uint256) {
 		unchecked {
-			if (ch <= 90) {
-				if (ch >= 65) {
-					return ch - 65; // [A-Z] => 0-25
-				} else if (ch >= 48 && ch <= 57) {
-					return ch - 22; // [0-9] => 26-35, 48-26=22
-				}
-			} else if (ch >= 97 && ch <= 122) {
+			if (ch >= 97 && ch <= 122) {
 				return ch - 97; // [a-z] => 0-25
+			} else if (ch >= 48 && ch <= 57) {
+				return ch - 22; // [0-9] => 26-35, 48-26=22
+			} else if (ch >= 65 && ch <= 90) {
+				return ch - 65; // [A-Z] => 0-25
+			} else {
+				return BASE;
 			}
-			return BASE;
 		}
 	}
 	// "An encoder SHOULD output only uppercase forms or only lowercase forms"
@@ -61,7 +60,6 @@ library Punycode {
 	function fromBase(uint256 i) internal pure returns (uint256) {
 		return i < 26 ? 97 + i : 22 + i;
 	}
-
 
 	// https://datatracker.ietf.org/doc/html/rfc3492#section-6.1
 	function adaptBias(uint256 delta, uint256 len, bool first) internal pure returns (uint256) {
