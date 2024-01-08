@@ -141,7 +141,7 @@ let provider = new ethers.JsonRpcProvider('https://mainnet.base.org', 8453, {sta
 
 let contract = new ethers.Contract('0xBEfeca057ea022e7aB419670a659d32f125973C1', [
 	`function decode(string memory s) external pure returns (string memory)`,
-	`function encode(string memory s) external pure returns (string memory)`
+	`function encode(string memory s) external pure returns (string memory)`,
 ], provider);
 
 for (let btn of document.querySelectorAll('#examples button')) {
@@ -191,6 +191,7 @@ async function update() {
 		`;
 		output.querySelector('input').value = decoded;
 	} catch (err) {
+		console.log(err);
 		let error;
 		if (err.code === 'CALL_EXCEPTION') {
 			error = `<b>Punycode Error</b>: ${err.reason}`;

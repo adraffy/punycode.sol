@@ -16,7 +16,7 @@ library Punycode {
 		if (src == dst) return puny; // unchanged
 		assembly { uni := sub(dst, 32) }
 	}
-	function encode(string memory uni) external pure returns (string memory puny) {
+	function encode(string memory uni) internal pure returns (string memory puny) {
 		uint256 src;
 		uint256 len;
 		assembly {
