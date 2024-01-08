@@ -36,6 +36,7 @@ h1 {
 	display: flex;
 	justify-content: space-between;
 	align-items: end;
+	gap: 8px;
 }
 #verify_btn {
 	white-space: pre;
@@ -103,22 +104,24 @@ footer {
 </head>
 <body>
 <header>
-	<h1>Punycode Decoder</h1>
+	<h1>Punycode.sol</h1>
 	<div id="github">
 		<a href="https://github.com/adraffy/punycode.sol">adraffy/punycode.sol</a>
 	</div>
 </header>
 <div id="contract">
-	<a href="https://basescan.org/address/0xBEfeca057ea022e7aB419670a659d32f125973C1#code"><b>base</b>:0xBEfeca057ea022e7aB419670a659d32f125973C1</a>
+	<a href="https://basescan.org/address/0xeD21a996edDbD149AFfE88F8743D3324e1DBfF4b#code"><b>base</b>:0xeD21a996edDbD149AFfE88F8743D3324e1DBfF4b</a>
 </div>
 <div id="actions">
 	<div id="examples">
 		<button>xn--ls8h</button>
-		<button>xn--w77hd</button>
-		<button>xn--poop-vv63cbab</button>
-		<button>xn--ns8haa78mbab</button>
+		<button>xN--w77hd</button>
+		<button>Xn--poop-vv63cbab</button>
+		<button>XN--ns8haa78mbab</button>
 		<button>xn--1ugaa67909bbab66ycac</button>
+		<button>xn--xn---yv63c</button>
 		<button data-puny="xn--_">❌ Not Basic</button>
+		<button data-puny="xn--💩">❌ ASCII</button>
 		<button data-puny="xn--0">❌ Overflow</button>
 		<button data-puny="xn--8c9by4f">❌ Surrogates</button>
 	</div>
@@ -139,7 +142,7 @@ let timer;
 let working;
 let provider = new ethers.JsonRpcProvider('https://mainnet.base.org', 8453, {staticNetwork: true});
 
-let contract = new ethers.Contract('0xBEfeca057ea022e7aB419670a659d32f125973C1', [
+let contract = new ethers.Contract('0xeD21a996edDbD149AFfE88F8743D3324e1DBfF4b', [
 	`function decode(string memory s) external pure returns (string memory)`,
 	`function encode(string memory s) external pure returns (string memory)`,
 ], provider);
