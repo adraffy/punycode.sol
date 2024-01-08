@@ -194,7 +194,6 @@ async function update() {
 		`;
 		output.querySelector('input').value = decoded;
 	} catch (err) {
-		console.log(err);
 		let error;
 		if (err.code === 'CALL_EXCEPTION') {
 			error = `<b>Punycode Error</b>: ${err.reason}`;

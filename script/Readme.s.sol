@@ -4,10 +4,9 @@ pragma solidity ^0.8.23;
 import {Script, console2} from "forge-std/Script.sol";
 import {Punycode} from "../src/Impl.sol";
 
-
 contract Readme is Script {
 
-	function run() public pure {		
+	function run() public pure {
 		console2.log(Punycode.decode("xn--ls8h"));
 		console2.log(Punycode.encode(unicode"💩"));
 
@@ -23,4 +22,4 @@ contract Readme is Script {
 		console2.logBytes32(h);
 	}
 
-} 
+}

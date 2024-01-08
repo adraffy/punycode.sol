@@ -239,11 +239,15 @@ library Punycode {
 				if (delta < t) break;
 				uint256 delta_t = delta - t;
 				uint256 base_t = BASE - t;
-				ptr = writeUTF8(ptr, fromBase(t + (delta_t % base_t)));
+				uint256 base = fromBase(t + (delta_t % base_t));
+				assembly { mstore8(ptr, base) }
+				ptr += 1; 
 				delta = delta_t / base_t;
 				k += BASE;
 			}	
-			return writeUTF8(ptr, fromBase(delta));
+			delta = fromBase(delta);
+			assembly { mstore8(ptr, delta) }
+			return ptr + 1;
 		}
 	}
 
