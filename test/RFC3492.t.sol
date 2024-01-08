@@ -1,4 +1,4 @@
-// generated 2024-01-05T06:09:30.052Z
+// generated 2024-01-08T02:16:04.220Z
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.23;
 
@@ -152,10 +152,10 @@ contract Test_RFC3492 is Test {
 	}
 	
 	// -> $1.00 <- (this example is bugged in the rfc)
-	function test_decode__u3Eu20u241u2E00u20u3C_() public {
+	function test_decode___u3E__u20__u24_1_u2E_00_u20__u3C__() public {
 		assertEq("-> $1.00 <-", Punycode.decode("-> $1.00 <-"));
 	}
-	function test_encode__u3Eu20u241u2E00u20u3C_() public {
+	function test_encode___u3E__u20__u24_1_u2E_00_u20__u3C__() public {
 		assertEq(Punycode.encode("-> $1.00 <-"), "-> $1.00 <-");
 	}
 

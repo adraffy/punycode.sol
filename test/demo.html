@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Punycode Decoder</title>
+<title>Punycode.sol</title>
 <style>
 body {
 	margin: 3rem;
@@ -109,7 +109,7 @@ footer {
 	</div>
 </header>
 <div id="contract">
-	<a href="https://basescan.org/address/0x504df0Fc26dA4eD7564652D22f13CD4d58c4BAa1#code"><b>base</b>:0x504df0Fc26dA4eD7564652D22f13CD4d58c4BAa1</a>
+	<a href="https://basescan.org/address/0xBEfeca057ea022e7aB419670a659d32f125973C1#code"><b>base</b>:0xBEfeca057ea022e7aB419670a659d32f125973C1</a>
 </div>
 <div id="actions">
 	<div id="examples">
@@ -139,8 +139,9 @@ let timer;
 let working;
 let provider = new ethers.JsonRpcProvider('https://mainnet.base.org', 8453, {staticNetwork: true});
 
-let contract = new ethers.Contract('0x504df0Fc26dA4eD7564652D22f13CD4d58c4BAa1', [
-	`function decode(string memory s) external pure returns (string memory)`
+let contract = new ethers.Contract('0xBEfeca057ea022e7aB419670a659d32f125973C1', [
+	`function decode(string memory s) external pure returns (string memory)`,
+	`function encode(string memory s) external pure returns (string memory)`
 ], provider);
 
 for (let btn of document.querySelectorAll('#examples button')) {

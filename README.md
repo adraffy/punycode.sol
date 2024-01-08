@@ -7,10 +7,10 @@ Solidity [Punycode](https://datatracker.ietf.org/doc/html/rfc3492) without IDNA.
 	* Encode `~2000 gas/codepoint`
 * Reference Implementation: [adraffy/punycode.js](https://github.com/adraffy/punycode.js/)
 * [**Demo**](https://adraffy.github.io/punycode.sol/test/demo.html) ⭐
-	*  Deployment: [`base:0x504df0Fc26dA4eD7564652D22f13CD4d58c4BAa1`](https://basescan.org/address/0x504df0Fc26dA4eD7564652D22f13CD4d58c4BAa1#code)
+	*  Deployment: [`base:0xBEfeca057ea022e7aB419670a659d32f125973C1`](https://basescan.org/address/0xBEfeca057ea022e7aB419670a659d32f125973C1#code)
 
 ```solidity
-import {Punycode} from "./Punycode.sol";
+import {Punycode} from "https://github.com/adraffy/punycode.sol/blob/main/src/Punycode.sol";
 
 string memory unicode = Punycode.decode("xn--ls8h"); // "💩"
 string memory punycode = Punycode.encode(unicode"💩"); // "xn--ls8h"
@@ -44,12 +44,13 @@ console2.logBytes32(h); // 0xba967c160905ade030f84952644a963994eeaed3881a6b8a4e9
 
 <!-- 1. Edit: [Impl.sol](./src/Impl.sol) -->
 1. `forge test` — run [tests](./test/)
-	* ⚠️ might take a moment to compile the ENS tests
 1. `forge script GasEncode` — estimate gas for `encode()`
 1. `forge script GasDecode` — estimate gas for `decode()`
 
-#### Create Tests
+#### Test Generation
 * `cd make-tests/`
 * `npm i`
-* [`node fetch-ens.mjs`](./make-tests/fetch-ens.mjs) — sample from [registrations](https://github.com/adraffy/ens-labels/)
+* [`node fetch-ens.mjs`](./make-tests/fetch-ens.mjs) — sample from [known labels](https://github.com/adraffy/ens-labels/)
 * [`node make.mjs`](./make-tests/make.mjs) — convert [data](./make-tests/data/) into [tests](./test/)
+* Test **ALL** known labels: [`./all.sh`](./make-tests/all.sh)
+	* ⚠️ takes 30+ minutes

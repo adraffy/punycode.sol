@@ -1,4 +1,4 @@
-// generated 2024-01-05T06:09:30.053Z
+// generated 2024-01-08T02:16:04.121Z
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.23;
 
@@ -8,10 +8,10 @@ import {Punycode} from "../src/Impl.sol";
 contract Test_Custom is Test {
 	
 	// empty string
-	function test_decode_empty() public {
+	function test_decode_() public {
 		assertEq("", Punycode.decode(""));
 	}
-	function test_encode_empty() public {
+	function test_encode_() public {
 		assertEq(Punycode.encode(""), "");
 	}
 	
@@ -24,7 +24,7 @@ contract Test_Custom is Test {
 	}
 	
 	// error: expected ASCII
-	function testFail_decode_xn__u1F4A9() public {
+	function testFail_decode_xn___u1F4A9_() public {
 		assertEq("<invalid>", Punycode.decode(unicode"xn--💩"));
 	}
 	

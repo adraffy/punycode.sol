@@ -88,13 +88,13 @@ library Punycode {
 	// https://datatracker.ietf.org/doc/html/rfc3492#section-6.2
 	function decode(uint256 src, uint256 src_len) internal pure returns (uint256 dst, uint256 dst_len) {
 		unchecked {
-			// verbatim: "abc"
-			// pure:     "xn--<encoded>"
-			// mixed:    "xn--abc-<encoded>"
+			// only-ascii:  "abc"
+			// only-upper:  "xn--<encoded>"
+			// ascii+upper: "xn--abc-<encoded>"
 			require(isASCII(src, src_len), "ascii");
 			if (src_len < 4) return (src, src_len); // too short
 			uint256 temp;
-			assembly { temp := shr(224, mload(src)) }
+			assembly { temp := shr(224, mload(src)) } // first 4 bytes
 			if ((temp & 0x2D2D) != 0x2D2D) return (src, src_len); // doesnt match: /^.{2}--/
 			require(toBase(temp >> 24) == 23 && toBase((temp >> 16) & 0xFF) == 13, "extension"); // doesnt match: /^xn/i
 			assembly {
@@ -194,12 +194,12 @@ library Punycode {
 			if (cp < MIN_CP) {
 				assembly { mstore8(dst_ptr, cp) } // write byte
 				dst_ptr += 1;
-			} else {
-				cps[cps_len] = uint32(cp); // save codepoint
 			}
+			// ascii codepoints are written instead of zero-ing
+			cps[cps_len] = uint32(cp); // save codepoint
 			cps_len += 1;
 		}
-		end = dst_ptr - dst - 3; 
+		end = dst_ptr - dst - 3; // variable reuse: starting 1-based index
 		if (end > 1) { // add "-" since we have some ascii
 			assembly { mstore8(dst_ptr, 0x2D) } // write byte
 			dst_ptr += 1;

@@ -1,4 +1,4 @@
-// generated 2024-01-05T06:09:30.071Z
+// generated 2024-01-08T02:16:04.215Z
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.23;
 
@@ -350,10 +350,10 @@ contract Test_ENS is Test {
 		assertEq(Punycode.encode(unicode"➖3⃣0⃣0⃣0⃣0⃣"), "xn--30000-mv4bbbbb969p");
 	}
 	
-	function test_decode_xn__u23dior_mv4b() public {
+	function test_decode_xn___u23_dior_mv4b() public {
 		assertEq(unicode"#⃣dior", Punycode.decode("xn--#dior-mv4b"));
 	}
-	function test_encode_xn__u23dior_mv4b() public {
+	function test_encode_xn___u23_dior_mv4b() public {
 		assertEq(Punycode.encode(unicode"#⃣dior"), "xn--#dior-mv4b");
 	}
 	
@@ -882,10 +882,10 @@ contract Test_ENS is Test {
 		assertEq(Punycode.encode(unicode"puppy🐩"), "xn--puppy-ds04d");
 	}
 	
-	function test_decode_xn__u23lifeisshort_t81g() public {
+	function test_decode_xn___u23_lifeisshort_t81g() public {
 		assertEq(unicode"#⃣lifeisshort", Punycode.decode("xn--#lifeisshort-t81g"));
 	}
-	function test_encode_xn__u23lifeisshort_t81g() public {
+	function test_encode_xn___u23_lifeisshort_t81g() public {
 		assertEq(Punycode.encode(unicode"#⃣lifeisshort"), "xn--#lifeisshort-t81g");
 	}
 	
@@ -952,10 +952,10 @@ contract Test_ENS is Test {
 		assertEq(Punycode.encode(unicode"🇭🇰776"), "xn--776-j292bpa");
 	}
 	
-	function test_decode_xn__u2344_uc1abb() public {
+	function test_decode_xn___u23_44_uc1abb() public {
 		assertEq(unicode"#⃣4⃣4⃣", Punycode.decode("xn--#44-uc1abb"));
 	}
-	function test_encode_xn__u2344_uc1abb() public {
+	function test_encode_xn___u23_44_uc1abb() public {
 		assertEq(Punycode.encode(unicode"#⃣4⃣4⃣"), "xn--#44-uc1abb");
 	}
 	
@@ -1162,10 +1162,10 @@ contract Test_ENS is Test {
 		assertEq(Punycode.encode(unicode"حذيفه"), "xn--sgbg5cyan");
 	}
 	
-	function test_decode_xn__u23twitter_954d() public {
+	function test_decode_xn___u23_twitter_954d() public {
 		assertEq(unicode"#⃣twitter", Punycode.decode("xn--#twitter-954d"));
 	}
-	function test_encode_xn__u23twitter_954d() public {
+	function test_encode_xn___u23_twitter_954d() public {
 		assertEq(Punycode.encode(unicode"#⃣twitter"), "xn--#twitter-954d");
 	}
 	
@@ -1484,10 +1484,10 @@ contract Test_ENS is Test {
 		assertEq(Punycode.encode(unicode"البطاطس"), "xn--mgbac9bsb1g");
 	}
 	
-	function test_decode_xn__u24_ugn044awp33c() public {
+	function test_decode_xn___u24__ugn044awp33c() public {
 		assertEq(unicode"$❤‍🔥", Punycode.decode("xn--$-ugn044awp33c"));
 	}
-	function test_encode_xn__u24_ugn044awp33c() public {
+	function test_encode_xn___u24__ugn044awp33c() public {
 		assertEq(Punycode.encode(unicode"$❤‍🔥"), "xn--$-ugn044awp33c");
 	}
 	
@@ -1589,10 +1589,10 @@ contract Test_ENS is Test {
 		assertEq(Punycode.encode(unicode"३३८३"), "xn--g4baat");
 	}
 	
-	function test_decode_xn____ugn0252slmaq0g() public {
+	function test_decode_xn___u5F__ugn0252slmaq0g() public {
 		assertEq(unicode"_👨🏼‍🚀", Punycode.decode("xn--_-ugn0252slmaq0g"));
 	}
-	function test_encode_xn____ugn0252slmaq0g() public {
+	function test_encode_xn___u5F__ugn0252slmaq0g() public {
 		assertEq(Punycode.encode(unicode"_👨🏼‍🚀"), "xn--_-ugn0252slmaq0g");
 	}
 	
@@ -2562,10 +2562,10 @@ contract Test_ENS is Test {
 		assertEq(Punycode.encode(unicode"ownëd"), "xn--ownd-npa");
 	}
 	
-	function test_decode_xn__u24pepes_7h0c() public {
+	function test_decode_xn___u24_pepes_7h0c() public {
 		assertEq(unicode"$pepe’s", Punycode.decode("xn--$pepes-7h0c"));
 	}
-	function test_encode_xn__u24pepes_7h0c() public {
+	function test_encode_xn___u24_pepes_7h0c() public {
 		assertEq(Punycode.encode(unicode"$pepe’s"), "xn--$pepes-7h0c");
 	}
 	
@@ -4935,10 +4935,10 @@ contract Test_ENS is Test {
 		assertEq(Punycode.encode(unicode"玖玖叁"), "xn--7nrr45ea");
 	}
 	
-	function test_decode_xn__u23target_ef8c() public {
+	function test_decode_xn___u23_target_ef8c() public {
 		assertEq(unicode"#⃣target", Punycode.decode("xn--#target-ef8c"));
 	}
-	function test_encode_xn__u23target_ef8c() public {
+	function test_encode_xn___u23_target_ef8c() public {
 		assertEq(Punycode.encode(unicode"#⃣target"), "xn--#target-ef8c");
 	}
 	
@@ -5663,10 +5663,10 @@ contract Test_ENS is Test {
 		assertEq(Punycode.encode(unicode"jeansébastien"), "xn--jeansbastien-feb");
 	}
 	
-	function test_decode_xn__u2A23_uc1abb() public {
+	function test_decode_xn___u2A_23_uc1abb() public {
 		assertEq(unicode"*⃣2⃣3⃣", Punycode.decode("xn--*23-uc1abb"));
 	}
-	function test_encode_xn__u2A23_uc1abb() public {
+	function test_encode_xn___u2A_23_uc1abb() public {
 		assertEq(Punycode.encode(unicode"*⃣2⃣3⃣"), "xn--*23-uc1abb");
 	}
 	
@@ -6293,10 +6293,10 @@ contract Test_ENS is Test {
 		assertEq(Punycode.encode(unicode"一二一四"), "xn--4gqa33bp8y");
 	}
 	
-	function test_decode_xn__u24_ww3saa() public {
+	function test_decode_xn___u24__ww3saa() public {
 		assertEq(unicode"$😘😘😘", Punycode.decode("xn--$-ww3saa"));
 	}
-	function test_encode_xn__u24_ww3saa() public {
+	function test_encode_xn___u24__ww3saa() public {
 		assertEq(Punycode.encode(unicode"$😘😘😘"), "xn--$-ww3saa");
 	}
 	
@@ -6531,10 +6531,10 @@ contract Test_ENS is Test {
 		assertEq(Punycode.encode(unicode"🇹🇷bozkurt"), "xn--bozkurt-2x54fra");
 	}
 	
-	function test_decode_xn__u23duet_mv4b() public {
+	function test_decode_xn___u23_duet_mv4b() public {
 		assertEq(unicode"#⃣duet", Punycode.decode("xn--#duet-mv4b"));
 	}
-	function test_encode_xn__u23duet_mv4b() public {
+	function test_encode_xn___u23_duet_mv4b() public {
 		assertEq(Punycode.encode(unicode"#⃣duet"), "xn--#duet-mv4b");
 	}
 	
@@ -7301,10 +7301,10 @@ contract Test_ENS is Test {
 		assertEq(Punycode.encode(unicode"一颗牙的保安"), "xn--4gq48be2tn3wpyelu3d");
 	}
 	
-	function test_decode_xn__u23sales_in1c() public {
+	function test_decode_xn___u23_sales_in1c() public {
 		assertEq(unicode"#⃣sales", Punycode.decode("xn--#sales-in1c"));
 	}
-	function test_encode_xn__u23sales_in1c() public {
+	function test_encode_xn___u23_sales_in1c() public {
 		assertEq(Punycode.encode(unicode"#⃣sales"), "xn--#sales-in1c");
 	}
 	
@@ -7336,10 +7336,10 @@ contract Test_ENS is Test {
 		assertEq(Punycode.encode(unicode"📏📏📏"), "xn--ot8haa");
 	}
 	
-	function test_decode_xn__u23fashion_954d() public {
+	function test_decode_xn___u23_fashion_954d() public {
 		assertEq(unicode"#⃣fashion", Punycode.decode("xn--#fashion-954d"));
 	}
-	function test_encode_xn__u23fashion_954d() public {
+	function test_encode_xn___u23_fashion_954d() public {
 		assertEq(Punycode.encode(unicode"#⃣fashion"), "xn--#fashion-954d");
 	}
 	
@@ -7427,10 +7427,10 @@ contract Test_ENS is Test {
 		assertEq(Punycode.encode(unicode"0⃣0⃣0⃣1⃣1⃣3⃣"), "xn--000113-in1cbbbbb");
 	}
 	
-	function test_decode_xn__u2Au2Au2A_uc1abb() public {
+	function test_decode_xn___u2A__u2A__u2A__uc1abb() public {
 		assertEq(unicode"*⃣*⃣*⃣", Punycode.decode("xn--***-uc1abb"));
 	}
-	function test_encode_xn__u2Au2Au2A_uc1abb() public {
+	function test_encode_xn___u2A__u2A__u2A__uc1abb() public {
 		assertEq(Punycode.encode(unicode"*⃣*⃣*⃣"), "xn--***-uc1abb");
 	}
 	
@@ -7833,10 +7833,10 @@ contract Test_ENS is Test {
 		assertEq(Punycode.encode(unicode"apple1⃣"), "xn--apple1-nn1c");
 	}
 	
-	function test_decode_xn__u23_cncg0gb5991b8s9y() public {
+	function test_decode_xn___u23__cncg0gb5991b8s9y() public {
 		assertEq(unicode"#️⃣محمد", Punycode.decode("xn--#-cncg0gb5991b8s9y"));
 	}
-	function test_encode_xn__u23_cncg0gb5991b8s9y() public {
+	function test_encode_xn___u23__cncg0gb5991b8s9y() public {
 		assertEq(Punycode.encode(unicode"#️⃣محمد"), "xn--#-cncg0gb5991b8s9y");
 	}
 	
@@ -8064,10 +8064,10 @@ contract Test_ENS is Test {
 		assertEq(Punycode.encode(unicode"۸٤٥"), "xn--dibc35b");
 	}
 	
-	function test_decode_xn__u28u20u29_gdcg5451bda959cgqo() public {
+	function test_decode_xn___u28__u20__u29__gdcg5451bda959cgqo() public {
 		assertEq(unicode"(ᵔ̀ ▿ ́ᵔ)", Punycode.decode("xn--( )-gdcg5451bda959cgqo"));
 	}
-	function test_encode_xn__u28u20u29_gdcg5451bda959cgqo() public {
+	function test_encode_xn___u28__u20__u29__gdcg5451bda959cgqo() public {
 		assertEq(Punycode.encode(unicode"(ᵔ̀ ▿ ́ᵔ)"), "xn--( )-gdcg5451bda959cgqo");
 	}
 	
@@ -9093,10 +9093,10 @@ contract Test_ENS is Test {
 		assertEq(Punycode.encode(unicode"áxel"), "xn--xel-dla");
 	}
 	
-	function test_decode_xn__u20fomo_mkr() public {
+	function test_decode_xn___u20_fomo_mkr() public {
 		assertEq(unicode" ๋fomo", Punycode.decode("xn-- fomo-mkr"));
 	}
-	function test_encode_xn__u20fomo_mkr() public {
+	function test_encode_xn___u20_fomo_mkr() public {
 		assertEq(Punycode.encode(unicode" ๋fomo"), "xn-- fomo-mkr");
 	}
 	
@@ -9478,24 +9478,24 @@ contract Test_ENS is Test {
 		assertEq(Punycode.encode(unicode"1‌‌‌69"), "xn--169-9m0aaa");
 	}
 	
-	function test_decode_xn__u24_rqcaaaa() public {
+	function test_decode_xn___u24__rqcaaaa() public {
 		assertEq(unicode"$٩٩٩٩٩", Punycode.decode("xn--$-rqcaaaa"));
 	}
-	function test_encode_xn__u24_rqcaaaa() public {
+	function test_encode_xn___u24__rqcaaaa() public {
 		assertEq(Punycode.encode(unicode"$٩٩٩٩٩"), "xn--$-rqcaaaa");
 	}
 	
-	function test_decode_xn__u241337s_7h0c() public {
+	function test_decode_xn___u24_1337s_7h0c() public {
 		assertEq(unicode"$1337’s", Punycode.decode("xn--$1337s-7h0c"));
 	}
-	function test_encode_xn__u241337s_7h0c() public {
+	function test_encode_xn___u24_1337s_7h0c() public {
 		assertEq(Punycode.encode(unicode"$1337’s"), "xn--$1337s-7h0c");
 	}
 	
-	function test_decode_xn__u24_hycaaa() public {
+	function test_decode_xn___u24__hycaaa() public {
 		assertEq(unicode"$۰۰۰۰", Punycode.decode("xn--$-hycaaa"));
 	}
-	function test_encode_xn__u24_hycaaa() public {
+	function test_encode_xn___u24__hycaaa() public {
 		assertEq(Punycode.encode(unicode"$۰۰۰۰"), "xn--$-hycaaa");
 	}
 	
@@ -9506,10 +9506,10 @@ contract Test_ENS is Test {
 		assertEq(Punycode.encode(unicode"௯௯௪"), "xn--rncja");
 	}
 	
-	function test_decode_xn__u23follow_ef8c() public {
+	function test_decode_xn___u23_follow_ef8c() public {
 		assertEq(unicode"#⃣follow", Punycode.decode("xn--#follow-ef8c"));
 	}
-	function test_encode_xn__u23follow_ef8c() public {
+	function test_encode_xn___u23_follow_ef8c() public {
 		assertEq(Punycode.encode(unicode"#⃣follow"), "xn--#follow-ef8c");
 	}
 	
@@ -9723,10 +9723,10 @@ contract Test_ENS is Test {
 		assertEq(Punycode.encode(unicode"scfc🦢"), "xn--scfc-t214c");
 	}
 	
-	function test_decode_xn__u2481_vc1ab() public {
+	function test_decode_xn___u24_81_vc1ab() public {
 		assertEq(unicode"$8⃣1⃣", Punycode.decode("xn--$81-vc1ab"));
 	}
-	function test_encode_xn__u2481_vc1ab() public {
+	function test_encode_xn___u24_81_vc1ab() public {
 		assertEq(Punycode.encode(unicode"$8⃣1⃣"), "xn--$81-vc1ab");
 	}
 	
@@ -10031,10 +10031,10 @@ contract Test_ENS is Test {
 		assertEq(Punycode.encode(unicode"🇩🇪054"), "xn--054-2192bfa");
 	}
 	
-	function test_decode_xn__u23113_q37abbb() public {
+	function test_decode_xn___u23_113_q37abbb() public {
 		assertEq(unicode"#⃣1⃣1⃣3⃣", Punycode.decode("xn--#113-q37abbb"));
 	}
-	function test_encode_xn__u23113_q37abbb() public {
+	function test_encode_xn___u23_113_q37abbb() public {
 		assertEq(Punycode.encode(unicode"#⃣1⃣1⃣3⃣"), "xn--#113-q37abbb");
 	}
 	
@@ -11599,10 +11599,10 @@ contract Test_ENS is Test {
 		assertEq(Punycode.encode(unicode"✌🏻🤠✌🏻"), "xn--7bia01156aba796d");
 	}
 	
-	function test_decode_xn____ugn92zj306c() public {
+	function test_decode_xn___u5F__ugn92zj306c() public {
 		assertEq(unicode"_🧎‍♀", Punycode.decode("xn--_-ugn92zj306c"));
 	}
-	function test_encode_xn____ugn92zj306c() public {
+	function test_encode_xn___u5F__ugn92zj306c() public {
 		assertEq(Punycode.encode(unicode"_🧎‍♀"), "xn--_-ugn92zj306c");
 	}
 	
@@ -12439,10 +12439,10 @@ contract Test_ENS is Test {
 		assertEq(Punycode.encode(unicode"٨٠٢٩"), "xn--8hbeqg");
 	}
 	
-	function test_decode_xn__u24022_r37abb96046bcac() public {
+	function test_decode_xn___u24_022_r37abb96046bcac() public {
 		assertEq(unicode"$0️⃣2️⃣2️⃣", Punycode.decode("xn--$022-r37abb96046bcac"));
 	}
-	function test_encode_xn__u24022_r37abb96046bcac() public {
+	function test_encode_xn___u24_022_r37abb96046bcac() public {
 		assertEq(Punycode.encode(unicode"$0️⃣2️⃣2️⃣"), "xn--$022-r37abb96046bcac");
 	}
 	
@@ -13209,10 +13209,10 @@ contract Test_ENS is Test {
 		assertEq(Punycode.encode(unicode"おもしろい"), "xn--n8jl3b5k4b");
 	}
 	
-	function test_decode_xn__u25E2u2580u2580_tn96haa() public {
+	function test_decode_xn___u25_E2_u25_80_u25_80_tn96haa() public {
 		assertEq(unicode"%E2%80%80🦄🦄🦄", Punycode.decode("xn--%E2%80%80-tn96haa"));
 	}
-	function test_encode_xn__u25E2u2580u2580_tn96haa() public {
+	function test_encode_xn___u25_E2_u25_80_u25_80_tn96haa() public {
 		assertEq(Punycode.encode(unicode"%E2%80%80🦄🦄🦄"), "xn--%E2%80%80-tn96haa");
 	}
 	
@@ -13776,10 +13776,10 @@ contract Test_ENS is Test {
 		assertEq(Punycode.encode(unicode"七五一"), "xn--4gqf94b");
 	}
 	
-	function test_decode_xn__u23_2sn7642saa() public {
+	function test_decode_xn___u23__2sn7642saa() public {
 		assertEq(unicode"#⃣💲💲💲", Punycode.decode("xn--#-2sn7642saa"));
 	}
-	function test_encode_xn__u23_2sn7642saa() public {
+	function test_encode_xn___u23__2sn7642saa() public {
 		assertEq(Punycode.encode(unicode"#⃣💲💲💲"), "xn--#-2sn7642saa");
 	}
 	
@@ -13846,10 +13846,10 @@ contract Test_ENS is Test {
 		assertEq(Punycode.encode(unicode"龙龙龙龙龙"), "xn--yi7aaaaa");
 	}
 	
-	function test_decode_xn__u2A30_uc1abb() public {
+	function test_decode_xn___u2A_30_uc1abb() public {
 		assertEq(unicode"*⃣3⃣0⃣", Punycode.decode("xn--*30-uc1abb"));
 	}
-	function test_encode_xn__u2A30_uc1abb() public {
+	function test_encode_xn___u2A_30_uc1abb() public {
 		assertEq(Punycode.encode(unicode"*⃣3⃣0⃣"), "xn--*30-uc1abb");
 	}
 	
@@ -13909,10 +13909,10 @@ contract Test_ENS is Test {
 		assertEq(Punycode.encode(unicode"ilove🧀"), "xn--ilove-os74d");
 	}
 	
-	function test_decode_xn__u23prada_in1c() public {
+	function test_decode_xn___u23_prada_in1c() public {
 		assertEq(unicode"#⃣prada", Punycode.decode("xn--#prada-in1c"));
 	}
-	function test_encode_xn__u23prada_in1c() public {
+	function test_encode_xn___u23_prada_in1c() public {
 		assertEq(Punycode.encode(unicode"#⃣prada"), "xn--#prada-in1c");
 	}
 	
