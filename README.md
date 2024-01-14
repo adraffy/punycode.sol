@@ -15,8 +15,11 @@ import {Punycode} from "https://github.com/adraffy/punycode.sol/blob/main/src/Pu
 string memory unicode = Punycode.decode("xn--ls8h"); // "💩"
 string memory punycode = Punycode.encode(unicode"💩"); // "xn--ls8h"
 
-// revert on failure
-function decode(string memory s) pure returns (string memory)
+// reverts on failure
+// let me know if a tryDecode() is needed
+function decode(string memory s) pure returns (string memory) 
+
+// never fails
 function encode(string memory s) pure returns (string memory)
 ```
 
@@ -50,7 +53,7 @@ console2.logBytes32(h); // 0xba967c160905ade030f84952644a963994eeaed3881a6b8a4e9
 #### Test Generation
 * `cd make-tests/`
 * `npm i`
-* [`node fetch-ens.mjs`](./make-tests/fetch-ens.mjs) — sample from [known labels](https://github.com/adraffy/ens-labels/)
-* [`node make.mjs`](./make-tests/make.mjs) — convert [data](./make-tests/data/) into [tests](./test/)
+* [`node fetch-ens.js`](./make-tests/fetch-ens.js) — sample from [known labels](https://github.com/adraffy/ens-labels/)
+* [`node make.js`](./make-tests/make.js) — convert [data](./make-tests/data/) into [tests](./test/)
 * Test **ALL** known labels: [`./all.sh`](./make-tests/all.sh)
 	* ⚠️ takes 30+ minutes

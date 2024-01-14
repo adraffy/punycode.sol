@@ -66,7 +66,7 @@ library Punycode {
 		unchecked {
 			delta = first ? delta / DAMP : delta >> 1;
 			delta += (delta / len);
-			uint256 k = 0;
+			uint256 k;
 			while (delta > MAX_DELTA) {
 				delta /= SHIFT_BASE;
 				k += BASE;
