@@ -58,7 +58,9 @@ library Punycode {
 	// "An encoder SHOULD output only uppercase forms or only lowercase forms"
 	// returns "a-z0-9"
 	function fromBase(uint256 i) internal pure returns (uint256) {
-		return i < 26 ? 97 + i : 22 + i;
+		unchecked {
+			return i < 26 ? 97 + i : 22 + i;
+		}
 	}
 
 	// https://datatracker.ietf.org/doc/html/rfc3492#section-6.1
@@ -163,73 +165,77 @@ library Punycode {
 		}
 	}
 	function insertUint32(uint256 ptr, uint256 index, uint256 above, uint256 value) internal pure {
-		uint256 head = ptr + (index << 2); // insertion
-		uint256 save;
-		assembly { save := mload(head) }
-		if (above >= 8) { // move everything 4 bytes to the right
-			uint256 tail = head + ((above - 8) << 2);
-			while (tail >= head) { // work backwards
-				assembly { mstore(add(tail, 4), mload(tail)) }
-				tail -= 32;
-			} 
+		unchecked {
+			uint256 head = ptr + (index << 2); // insertion
+			uint256 save;
+			assembly { save := mload(head) }
+			if (above >= 8) { // move everything 4 bytes to the right
+				uint256 tail = head + ((above - 8) << 2);
+				while (tail >= head) { // work backwards
+					assembly { mstore(add(tail, 4), mload(tail)) }
+					tail -= 32;
+				} 
+			}
+			assembly { mstore(head, or(shl(224, value), shr(32, save))) } // insert uint32
 		}
-		assembly { mstore(head, or(shl(224, value), shr(32, save))) } // insert uint32
 	}
 
 	// https://datatracker.ietf.org/doc/html/rfc3492#section-6.3
 	function encode(uint256 src, uint256 src_len) internal pure returns (uint256 dst, uint256 dst_len) {
-		if (isASCII(src, src_len)) return (src, src_len);
-		uint32[] memory cps = new uint32[](src_len);
-		assembly {
-			dst := add(mload(64), 32)
-			mstore(64, add(dst, add(5, shl(2, src_len)))) // new bytes("xn---" + src_len*4)
-			mstore(dst, 'xn------------------------------')
-		}
-		uint256 dst_ptr = dst + 4; // skip "xn--"
-		uint256 end = src + src_len;
-		uint256 cp;
-		uint256 cps_len;
-		while (src < end) {
-			(src, cp) = readUTF8(src);
-			if (cp < MIN_CP) {
-				assembly { mstore8(dst_ptr, cp) } // write byte
+		unchecked {
+			if (isASCII(src, src_len)) return (src, src_len);
+			uint32[] memory cps = new uint32[](src_len);
+			assembly {
+				dst := add(mload(64), 32)
+				mstore(64, add(dst, add(5, shl(2, src_len)))) // new bytes("xn---" + src_len*4)
+				mstore(dst, 'xn------------------------------')
+			}
+			uint256 dst_ptr = dst + 4; // skip "xn--"
+			uint256 end = src + src_len;
+			uint256 cp;
+			uint256 cps_len;
+			while (src < end) {
+				(src, cp) = readUTF8(src);
+				if (cp < MIN_CP) {
+					assembly { mstore8(dst_ptr, cp) } // write byte
+					dst_ptr += 1;
+				}
+				// ascii codepoints are written instead of zero-ing
+				cps[cps_len] = uint32(cp); // save codepoint
+				cps_len += 1;
+			}
+			end = dst_ptr - dst - 3; // variable reuse: starting 1-based index
+			if (end > 1) { // add "-" since we have some ascii
+				assembly { mstore8(dst_ptr, 0x2D) } // write byte
 				dst_ptr += 1;
 			}
-			// ascii codepoints are written instead of zero-ing
-			cps[cps_len] = uint32(cp); // save codepoint
-			cps_len += 1;
-		}
-		end = dst_ptr - dst - 3; // variable reuse: starting 1-based index
-		if (end > 1) { // add "-" since we have some ascii
-			assembly { mstore8(dst_ptr, 0x2D) } // write byte
-			dst_ptr += 1;
-		}
-		uint256 cp0 = MIN_CP;
-		uint256 bias = BIAS;
-		uint256 delta;
-		uint256 pos = end;
-		while (pos <= cps_len) {
-			uint256 cp1 = MAX_CP;
-			for (uint256 i; i < cps_len; i += 1) { // find next highest cp
-				cp = cps[i];
-				if (cp >= cp0 && cp < cp1) cp1 = cp;
-			}
-			delta += (cp1 - cp0) * pos;
-			for (uint256 i; i < cps_len; i += 1) {
-				cp = cps[i];
-				if (cp < cp1) {
-					delta += 1;
-				} else if (cp == cp1) {
-					dst_ptr = writePunycode(dst_ptr, delta, bias);
-					bias = adaptBias(delta, pos, pos == end);
-					delta = 0;
-					pos += 1;
+			uint256 cp0 = MIN_CP;
+			uint256 bias = BIAS;
+			uint256 delta;
+			uint256 pos = end;
+			while (pos <= cps_len) {
+				uint256 cp1 = MAX_CP;
+				for (uint256 i; i < cps_len; i += 1) { // find next highest cp
+					cp = cps[i];
+					if (cp >= cp0 && cp < cp1) cp1 = cp;
 				}
+				delta += (cp1 - cp0) * pos;
+				for (uint256 i; i < cps_len; i += 1) {
+					cp = cps[i];
+					if (cp < cp1) {
+						delta += 1;
+					} else if (cp == cp1) {
+						dst_ptr = writePunycode(dst_ptr, delta, bias);
+						bias = adaptBias(delta, pos, pos == end);
+						delta = 0;
+						pos += 1;
+					}
+				}
+				delta += 1;
+				cp0 = cp1 + 1;
 			}
-			delta += 1;
-			cp0 = cp1 + 1;
+			assembly { mstore(sub(dst, 32), sub(dst_ptr, dst)) } // truncate
 		}
-		assembly { mstore(sub(dst, 32), sub(dst_ptr, dst)) } // truncate
 	}
 	function writePunycode(uint256 ptr, uint256 delta, uint256 bias) internal pure returns (uint256) {
 		unchecked {

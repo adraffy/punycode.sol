@@ -7,10 +7,12 @@ import {Punycode} from "../src/Punycode.sol";
 // 20231231: 4310752
 // 20240101: 3494778
 // 20240104: 3208941
+// 20240121: 3081968
 
 // [encode]
 // 20240104: 6096960
 // 20240107: 5885720
+// 20240121: 4451978
 
 
 //import {Punycode} from "../src/PunycodeWithArray.sol";
