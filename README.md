@@ -1,11 +1,11 @@
 # punycode.sol
 
 Solidity [Punycode](https://datatracker.ietf.org/doc/html/rfc3492) without IDNA.
-
 * Library: [**Punycode.sol**](./src/Punycode.sol)
-	* Gas per codepoint for Unicode strings:
-		* Decode `~1300`
-		* Encode `~2500`
+	* ASCII strings: `~500 gas` (fastpath)
+	* Unicode strings:
+		* Decode `~1300 gas/codepoint`
+		* Encode `~2500 gas/codepoint`
 * Reference Implementation: [adraffy/**punycode.js**](https://github.com/adraffy/punycode.js/)
 * [**Demo**](https://adraffy.github.io/punycode.sol/test/demo.html) ⭐
 	*  Deployment: [`base:0xBEfeca057ea022e7aB419670a659d32f125973C1`](https://basescan.org/address/0xBEfeca057ea022e7aB419670a659d32f125973C1#code)
@@ -48,9 +48,12 @@ console2.logBytes32(h); // 0xba967c160905ade030f84952644a963994eeaed3881a6b8a4e9
 
 1. `foundryup`
 1. `npm i`
+1. `forge test`
 1. `npm run test` — random [validation](./test/test.js)
-1. `npm run test-all` — complete [validation](./test/test.js)
-1. `npm run gas` — [estimate gas](./test/gas.js)
-1. `forge test` — [internal functions](./test/Internal.t.sol)
-1. `forge script GasEncode` — [estimate gas for `encode()`](./script/GasEncode.s.sol)
-1. `forge script GasDecode` — [estimate gas for `decode()`](./script/GasDecode.s.sol)
+1. (optional) `npm run validate-all` — complete [validation](./test/test.js)
+
+### Gas Analysis
+
+* `npm run gas` — [estimate gas](./test/gas.js)
+* `forge script GasEncode` — [estimate gas for `encode()`](./script/GasEncode.s.sol)
+* `forge script GasDecode` — [estimate gas for `decode()`](./script/GasDecode.s.sol)

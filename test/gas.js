@@ -34,11 +34,14 @@ let contract = await foundry.deploy({sol: `
 
 const UNICODE_MAP = create_buckets(read_labels().UNICODE, x => x.ncp);
 
-const UNTIL = 32;
+const UNTIL = 50; // above this length, we run out of examples
+const MIN = 100; // min samples to include in average
 
 let rows = [];
 
-// there are enough examples per length
+console.log();
+console.log('[gas/codepoint for unicode strings]');
+
 for (let i = 3; i <= UNTIL; i++) {
 	let valid = random_sample(UNICODE_MAP.get(i) ?? [], 1000);
 	if (!valid.length) continue;
@@ -52,7 +55,6 @@ for (let i = 3; i <= UNTIL; i++) {
 	rows.push(row);
 }
 
-// bucket since not enough examples
 for (let i = UNTIL + 1; i < 5000; i += i) {
 	let j = i+i;
 	let valid = random_sample(Array.from({length: j-i}, (_, x) => UNICODE_MAP.get(i + x) ?? []).flat(), 500);
@@ -67,11 +69,17 @@ for (let i = UNTIL + 1; i < 5000; i += i) {
 	rows.push(row);
 }
 
-rows = rows.filter(x => x.n > 100);
-
+// compute average across all lengths
+rows = rows.filter(x => x.n >= MIN);
+console.log();
+console.log('[average]');
 console.log({
 	dec: Math.round(rows.reduce((a, x) => a + x.dec, 0) / rows.length),
 	enc: Math.round(rows.reduce((a, x) => a + x.enc, 0) / rows.length),
 });
+
+console.log();
+console.log('[json]');
+console.log(JSON.stringify(rows));
 
 foundry.shutdown();

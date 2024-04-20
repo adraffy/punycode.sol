@@ -25,7 +25,6 @@ library Punycode {
 			src := add(uni, 32)
 		}
 		(uint256 dst, ) = encode(src, len);
-		//if (src == dst) return uni; // unchanged
 		assembly { puny := sub(dst, 32) }
 	}
 
@@ -106,6 +105,7 @@ library Punycode {
 			}
 			uint256 end = src + src_len;
 			src += 4; // skip "xn--"
+
 			// 1. find last hyphen
 			uint256 p = end; // work backwards
 			uint256 i;

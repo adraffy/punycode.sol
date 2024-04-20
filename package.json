@@ -1,12 +1,35 @@
 {
+	"name": "@adraffy/punycode-contracts",
+	"description": "Punycode in Solidity",
+	"version": "0.0.1",
 	"type": "module",
 	"scripts": {
-		"test": "N=100000 node test/validate.js",
-		"test-all": "N=Infinity node test/validate.js",
-		"gas": "node test/gas.js"
+		"test": "forge test && npm run readme && npm run validate",
+		"validate": "N=100000 node test/validate.js",
+		"validate-all": "N=Infinity node test/validate.js",
+		"gas": "node test/gas.js",
+		"readme": "forge script Readme"
 	},
-	"dependencies": {
+	"files": [
+		"src/**/*.sol"
+	],
+	"devDependencies": {
 		"@adraffy/blocksmith": "^0.0.18",
 		"@adraffy/punycode": "^1.2.0"
-	}
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/adraffy/punycode.sol.git"
+	},
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/adraffy/punycode.sol/issues"
+	},
+	"homepage": "https://github.com/adraffy/punycode.sol#readme",
+	"author": "raffy.eth",
+	"keywords": [
+		"solidity",
+		"ethereum",
+		"punycode"
+	]
 }

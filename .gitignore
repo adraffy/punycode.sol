@@ -1,10 +1,9 @@
-crap/
-node_modules/
+junk/
 
-# forge crap
+# npm
+node_modules/
+*.tgz
+
+# foundry
 cache/
 out/
-
-# all.sh
-Temp.t.sol
-all/
