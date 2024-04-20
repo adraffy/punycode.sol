@@ -1,7 +1,8 @@
 {
 	"type": "module",
 	"scripts": {
-		"test": "node test/validate.js",
+		"test": "N=100000 node test/validate.js",
+		"test-all": "N=Infinity node test/validate.js",
 		"gas": "node test/gas.js"
 	},
 	"dependencies": {

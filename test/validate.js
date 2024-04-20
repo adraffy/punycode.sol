@@ -33,16 +33,20 @@ let contract = await foundry.deploy({sol: `
 `});
 after(() => foundry.shutdown());
 
+
 const {UNICODE, ASCII, INVALID} = read_labels();
+const max_samples = parseFloat(process.env.N) || 1000; // Infinity
+
+console.log({max_samples});
 
 test('invalid', async () => {
-	for (let label of INVALID) {
+	for (let label of random_sample(INVALID, max_samples)) {
 		await assert.rejects(() => contract.batch_check([label]), label);
 	}
 });
 
-test('ascii', T => prog(T, random_sample(ASCII, 50_000).map(x => [x, x])));
-test('unicode', T => prog(T, random_sample(UNICODE, 100_000).map(x => [x.label, x.puny])));
+test('ascii', T => prog(T, random_sample(ASCII, max_samples).map(x => [x, x])));
+test('unicode', T => prog(T, random_sample(UNICODE, max_samples).map(x => [x.label, x.puny])));
 
 async function prog(T, v, {dt = 5000} = {}) {
 	const t0 = performance.now();
@@ -51,10 +55,9 @@ async function prog(T, v, {dt = 5000} = {}) {
 		let chunk = v.slice(i, i += 100);
 		await contract.batch_check(chunk);	
 		let t = performance.now();
-		if (tx < t || i >= UNICODE.length) {
+		if (tx < t || i >= v.length) {
 			tx = t + dt;
-			await T.test(`${(100 * i / UNICODE.length).toFixed(2)}%`, () => {});
+			await T.test(`${(100 * i / v.length).toFixed(2)}%`, () => {});
 		}
 	}
 } 
-

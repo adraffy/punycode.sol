@@ -27,6 +27,7 @@ export function read_labels() {
 			let uni = String.fromCodePoint(...puny_decoded(puny));
 			if (uni !== label) throw new Error('roundtrip');
 			if (puny === label) {
+				if (puny.slice(2, 4) === '--') throw new Error('extension');
 				ASCII.push(label);
 			} else {
 				UNICODE.push({puny, label, ncp: [...label].length});

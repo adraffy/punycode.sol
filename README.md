@@ -48,7 +48,8 @@ console2.logBytes32(h); // 0xba967c160905ade030f84952644a963994eeaed3881a6b8a4e9
 
 1. `foundryup`
 1. `npm i`
-1. `npm run test` — [validation](./test/test.js)
+1. `npm run test` — random [validation](./test/test.js)
+1. `npm run test-all` — complete [validation](./test/test.js)
 1. `npm run gas` — [estimate gas](./test/gas.js)
 1. `forge test` — [internal functions](./test/Internal.t.sol)
 1. `forge script GasEncode` — [estimate gas for `encode()`](./script/GasEncode.s.sol)
