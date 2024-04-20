@@ -11,7 +11,7 @@ Solidity [Punycode](https://datatracker.ietf.org/doc/html/rfc3492) without IDNA.
 	*  Deployment: [`base:0xBEfeca057ea022e7aB419670a659d32f125973C1`](https://basescan.org/address/0xBEfeca057ea022e7aB419670a659d32f125973C1#code)
 
 ```solidity
-import {Punycode} from "https://github.com/adraffy/punycode.sol/blob/main/src/Punycode.sol";
+import {Punycode} from "@adraffy/punycode-contracts/src/Punycode.sol";
 
 string memory unicode = Punycode.decode("xn--ls8h"); // "💩"
 string memory punycode = Punycode.encode(unicode"💩"); // "xn--ls8h"
