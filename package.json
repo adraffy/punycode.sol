@@ -4,7 +4,8 @@
 	"version": "0.0.1",
 	"type": "module",
 	"scripts": {
-		"test": "forge test && npm run readme && npm run validate",
+		"build": "forge build --force",
+		"test": "npm run build && forge test && npm run readme && npm run validate",
 		"validate": "N=100000 node test/validate.js",
 		"validate-all": "N=Infinity node test/validate.js",
 		"gas": "node test/gas.js",

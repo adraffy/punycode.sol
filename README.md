@@ -48,8 +48,7 @@ console2.logBytes32(h); // 0xba967c160905ade030f84952644a963994eeaed3881a6b8a4e9
 
 1. `foundryup`
 1. `npm i`
-1. `forge test`
-1. `npm run test` — random [validation](./test/test.js)
+1. `npm run test` — forge tests + random [validation](./test/test.js)
 1. (optional) `npm run validate-all` — complete [validation](./test/test.js)
 
 ### Gas Analysis
