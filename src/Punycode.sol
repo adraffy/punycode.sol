@@ -4,6 +4,8 @@ pragma solidity ^0.8.23;
 
 library Punycode {
 
+	error InvalidPunycode();
+
 	// convenience
 	function decode(string memory puny) internal pure returns (string memory uni) {
 		uint256 src;
@@ -13,7 +15,6 @@ library Punycode {
 			src := add(puny, 32)
 		}
 		(uint256 dst, ) = decode(src, len);
-		if (src == dst) return puny; // unchanged
 		assembly { uni := sub(dst, 32) }
 	}
 	function encode(string memory uni) internal pure returns (string memory puny) {
@@ -24,7 +25,7 @@ library Punycode {
 			src := add(uni, 32)
 		}
 		(uint256 dst, ) = encode(src, len);
-		if (src == dst) return uni; // unchanged
+		//if (src == dst) return uni; // unchanged
 		assembly { puny := sub(dst, 32) }
 	}
 
@@ -93,49 +94,53 @@ library Punycode {
 			// only-ascii:  "abc"
 			// only-upper:  "xn--<encoded>"
 			// ascii+upper: "xn--abc-<encoded>"
-			require(isASCII(src, src_len), "ascii");
+			if (!isASCII(src, src_len)) revert InvalidPunycode(); // "not ascii"
 			if (src_len < 4) return (src, src_len); // too short
 			uint256 temp;
 			assembly { temp := shr(224, mload(src)) } // first 4 bytes
-			if ((temp & 0x2D2D) != 0x2D2D) return (src, src_len); // doesnt match: /^.{2}--/
-			require(toBase(temp >> 24) == 23 && toBase((temp >> 16) & 0xFF) == 13, "extension"); // doesnt match: /^xn/i
+			if ((temp & 0xFFFF) != 0x2D2D) return (src, src_len); // doesnt match: /^.{2}--/
+			if (!(toBase(temp >> 24) == 23 && toBase((temp >> 16) & 0xFF) == 13)) revert InvalidPunycode(); // "extension", doesnt match: /^xn/i 
 			assembly {
 				dst := add(mload(64), 32)
-				mstore(64, add(dst, shl(2, src_len))) // cps = new uint32[](src_len)
+				mstore(64, add(dst, shl(5, shr(3, add(src_len, 7))))) // cps = new uint32[](src_len)
 			}
 			uint256 end = src + src_len;
 			src += 4; // skip "xn--"
-			uint256 n; // number of codepoints
 			// 1. find last hyphen
 			uint256 p = end; // work backwards
+			uint256 i;
 			while (p > src) {
 				p -= 1;
 				assembly { temp := shr(248, mload(p)) } // read byte
 				if (temp == 0x2D) { // found it
-					n = p - src; // before hyphen
-					assembly { temp := add(dst, 3) } // lsb alignment in uint32
-					while (src < p) {
-						assembly { mstore8(temp, shr(248, mload(src))) } // cps[i] = cp
-						temp += 4;
-						src += 1;
+					dst_len = p - src; // length before hyphen
+					i = dst - 28; // rewind for left-clobber 
+					while (src < p) { // copy all ascii
+						assembly { 
+						 	temp := or(shl(32, temp), shr(248, mload(src))) // ready uint8 => push uint32
+						 	mstore(i, temp) // overwrite left-clobber
+						}
+						src += 1; // next ascii
+						i += 4;  // next uint32
 					}
-					src += 1; // skip hyphen
+					src += 1; // skip hyphen we found above
 					break;
 				}
 			}
+
 			// 2. decode punycode to codepoints
 			uint256 bias = BIAS;
 			uint256 cp = MIN_CP;
-			uint256 i;
+			i = 0;
 			while (src < end) {
 				uint256 prev = i;
 				uint256 w = 1;
 				uint256 k;
 				while (true) {
-					require(src < end, "overflow");
+					if (src >= end) revert InvalidPunycode(); // "overflow"
 					assembly { temp := shr(248, mload(src)) } // read byte
 					temp = toBase(temp);
-					require(temp != BASE, "not basic");
+					if (temp == BASE) revert InvalidPunycode(); // "not basic"
 					src += 1;
 					i += temp * w;
 					k += BASE;
@@ -143,18 +148,19 @@ library Punycode {
 					if (temp < t) break;
 					w *= BASE - t;
 				}
-				n += 1;
-				cp += i / n;
-				require(cp <= MAX_CP, "invalid");
-				bias = adaptBias(i - prev, n, prev == 0);
-				i %= n;
-				insertUint32(dst, i, n - i - 1, cp); // cps.splice(i, 0, cp)
+				dst_len += 1;
+				cp += i / dst_len;
+				if (cp > MAX_CP) revert InvalidPunycode(); // "invalid" cp
+				bias = adaptBias(i - prev, dst_len, prev == 0);
+				i %= dst_len;
+				insertUint32(dst + (i << 2), dst_len - i - 1, cp); // cps.splice(i, 0, cp)
 				i += 1;
 			}
+
 			// 3. encode codepoints as utf8
-			assembly { p := dst }
+			p = dst;
 			i = p;
-			end = p + (n << 2);
+			end = p + (dst_len << 2);
 			while (i < end) {
 				assembly { temp := shr(224, mload(i)) } // read uint32
 				p = writeUTF8(p, temp);
@@ -164,9 +170,9 @@ library Punycode {
 			assembly { mstore(sub(dst, 32), dst_len) } // truncate
 		}
 	}
-	function insertUint32(uint256 ptr, uint256 index, uint256 above, uint256 value) internal pure {
+	
+	function insertUint32(uint256 head, uint256 above, uint256 value) internal pure {
 		unchecked {
-			uint256 head = ptr + (index << 2); // insertion
 			uint256 save;
 			assembly { save := mload(head) }
 			if (above >= 8) { // move everything 4 bytes to the right

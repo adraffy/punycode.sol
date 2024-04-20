@@ -2,10 +2,11 @@
 
 Solidity [Punycode](https://datatracker.ietf.org/doc/html/rfc3492) without IDNA.
 
-* Library: [Punycode.sol](./src/Punycode.sol)
-	* Decode `~500 gas/byte`
-	* Encode `~2000 gas/codepoint`
-* Reference Implementation: [adraffy/punycode.js](https://github.com/adraffy/punycode.js/)
+* Library: [**Punycode.sol**](./src/Punycode.sol)
+	* Gas per codepoint for Unicode strings:
+		* Decode `~1300`
+		* Encode `~2500`
+* Reference Implementation: [adraffy/**punycode.js**](https://github.com/adraffy/punycode.js/)
 * [**Demo**](https://adraffy.github.io/punycode.sol/test/demo.html) ⭐
 	*  Deployment: [`base:0xBEfeca057ea022e7aB419670a659d32f125973C1`](https://basescan.org/address/0xBEfeca057ea022e7aB419670a659d32f125973C1#code)
 
@@ -43,17 +44,12 @@ assembly { h := keccak256(dst, len) }
 console2.logBytes32(h); // 0xba967c160905ade030f84952644a963994eeaed3881a6b8a4e9c8cbe452ad7a2
 ```
 
-## Build
+## Test
 
-<!-- 1. Edit: [Impl.sol](./src/Impl.sol) -->
-1. `forge test` — run [tests](./test/)
-1. `forge script GasEncode` — estimate gas for `encode()`
-1. `forge script GasDecode` — estimate gas for `decode()`
-
-#### Test Generation
-* `cd make-tests/`
-* `npm i`
-* [`node fetch-ens.js`](./make-tests/fetch-ens.js) — sample from [known labels](https://github.com/adraffy/ens-labels/)
-* [`node make.js`](./make-tests/make.js) — convert [data](./make-tests/data/) into [tests](./test/)
-* Test **ALL** known labels: [`./all.sh`](./make-tests/all.sh)
-	* ⚠️ takes 30+ minutes
+1. `foundryup`
+1. `npm i`
+1. `npm run test` — [validation](./test/test.js)
+1. `npm run gas` — [estimate gas](./test/gas.js)
+1. `forge test` — [internal functions](./test/Internal.t.sol)
+1. `forge script GasEncode` — [estimate gas for `encode()`](./script/GasEncode.s.sol)
+1. `forge script GasDecode` — [estimate gas for `decode()`](./script/GasDecode.s.sol)

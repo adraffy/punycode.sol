@@ -2,11 +2,11 @@
 pragma solidity ^0.8.23;
 
 import {Test} from "forge-std/Test.sol";
-import {Punycode} from "../src/Impl.sol";
+import {Punycode} from "../src/Punycode.sol";
 
 contract Test_Internal is Test {
 
-	function test_isASCII() public {
+	function test_isASCII() public pure {
 		string memory s = unicode"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\u0080"; // 33 "a" + non-ASCII
 		uint256 ptr;
 		assembly { ptr := add(s, 32) }
@@ -16,7 +16,7 @@ contract Test_Internal is Test {
 		assertEq(false, Punycode.isASCII(ptr, 34));
 	}
 
-	function test_toBase() public {
+	function test_toBase() public pure {
 		assertEq(0,  Punycode.toBase(uint8(bytes1('a'))));
 		assertEq(1,  Punycode.toBase(uint8(bytes1('b'))));
 		assertEq(2,  Punycode.toBase(uint8(bytes1('c'))));
@@ -88,7 +88,7 @@ contract Test_Internal is Test {
 		assertEq(36, Punycode.toBase(uint8(bytes1('$'))));
 	}
 
-	function test_fromBase() public {
+	function test_fromBase() public pure {
 		assertEq(uint8(bytes1('a')), Punycode.fromBase(0));
 		assertEq(uint8(bytes1('b')), Punycode.fromBase(1));
 		assertEq(uint8(bytes1('c')), Punycode.fromBase(2));
@@ -128,7 +128,7 @@ contract Test_Internal is Test {
 	}
 
 	// warning: this consumes a shitload of gas
-	function test_readWriteUTF8() public {
+	function test_readWriteUTF8() public pure {
 		bytes memory src = new bytes(8);
 		uint256 ptr;
 		assembly { ptr := src }

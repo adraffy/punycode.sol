@@ -2,7 +2,7 @@
 pragma solidity ^0.8.23;
 
 import {Script, console2} from "forge-std/Script.sol";
-import {Punycode} from "../src/Impl.sol";
+import {Punycode} from "../src/Punycode.sol";
 
 contract Readme is Script {
 
