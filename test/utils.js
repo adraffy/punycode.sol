@@ -1,5 +1,5 @@
 import {readFileSync} from 'node:fs';
-import {puny_decoded, puny_encoded} from '@adraffy/punycode';
+import {puny_decoded, puny_encoded, is_surrogate} from '@adraffy/punycode';
 
 export function create_buckets(v, fn) {
 	let map = new Map();
@@ -15,6 +15,16 @@ export function create_buckets(v, fn) {
 	return map;
 }
 
+export function punyable(label) {
+	let puny = puny_encoded(label);
+	let uni = String.fromCodePoint(...puny_decoded(puny));
+	if (uni !== label) throw new Error('roundtrip');
+	if (puny === label) {
+		if (puny.slice(2, 4) === '--') throw new Error('extension');
+	}
+	return puny;
+}
+
 export function read_labels() {
 	let labels = JSON.parse(readFileSync(new URL('../ens-labels/labels.json', import.meta.url)));
 	console.log({labels: labels.length});
@@ -23,11 +33,8 @@ export function read_labels() {
 	const INVALID = [];
 	for (let label of labels) {
 		try {
-			let puny = puny_encoded(label);
-			let uni = String.fromCodePoint(...puny_decoded(puny));
-			if (uni !== label) throw new Error('roundtrip');
+			let puny = punyable(label);
 			if (puny === label) {
-				if (puny.slice(2, 4) === '--') throw new Error('extension');
 				ASCII.push(label);
 			} else {
 				UNICODE.push({puny, label, ncp: [...label].length});
@@ -53,4 +60,26 @@ export function random_sample(v, n) {
 		v = v.slice(0, n); // truncate
 	}
 	return v;
+}
+
+export function random_int(n) {
+	return n * Math.random()|0;
+}
+
+export function random_puny_str(n = 256) {
+	let puny = String.fromCodePoint(...Array.from({length: 1 + random_int(n)}, () => 97 + random_int(26)));
+	if (Math.random() < 0.5) {
+		let pos = 1 + random_int(puny.length);
+		puny = puny.slice(0, pos) + '-' + puny.slice(pos);
+	}
+	return `xn--${puny}`;
+}
+
+export function random_unicode_str(n = 256) {
+	return String.fromCodePoint(...Array.from({length: 1 + random_int(n)}, () => {
+		while (true) {
+			let cp = random_int(0x110000);
+			if (!is_surrogate(cp)) return cp;
+		}
+	}));
 }
