@@ -47,6 +47,7 @@ console2.logBytes32(h); // 0xba967c160905ade030f84952644a963994eeaed3881a6b8a4e9
 
 ## Test
 
+1. (optional) `git submodule update --remote`
 1. `foundryup`
 1. `npm i`
 1. `npm run test` — forge tests + random [validation](./test/test.js)

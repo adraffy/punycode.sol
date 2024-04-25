@@ -32,5 +32,31 @@ contract PunycodeDemo {
 			require(keccak256(bytes(Punycode.decode(Punycode.encode(uni)))) == hash_uni, puny);
 		}
 	}
+
+	function batch_encode_gas(string[] calldata v) external view returns (uint256) {
+		unchecked {
+			uint256 g = gasleft();
+			for (uint256 i; i < v.length; i++) {
+				string memory s = v[i];
+				uint256 p;
+				assembly { p := add(s, 32) }
+				Punycode.encode(p, bytes(s).length);
+			}
+			return g - gasleft();
+		}
+	}
+
+	function batch_decode_gas(string[] calldata v) external view returns (uint256) {
+		unchecked {
+			uint256 g = gasleft();
+			for (uint256 i; i < v.length; i++) {
+				string memory s = v[i];
+				uint256 p;
+				assembly { p := add(s, 32) }
+				Punycode.decode(p, bytes(s).length);
+			}
+			return g - gasleft();
+		}
+	}
 	
 }
