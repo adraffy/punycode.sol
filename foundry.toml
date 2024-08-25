@@ -3,4 +3,5 @@
 optimizer = true
 optimizer_runs = 420
 
-#via_ir = true
+# https://github.com/foundry-rs/foundry/pull/8274/files
+gas_limit = 9223372036854775807

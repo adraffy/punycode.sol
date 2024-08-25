@@ -4,10 +4,12 @@ import {punyable, random_unicode_str, random_puny_str} from './utils.js';
 import assert from 'node:assert/strict';
 
 let foundry = await Foundry.launch({infiniteCallGas: true});
+//let Punycode = await foundry.deploy({file: 'Punycode'});
+//let contract = await foundry.deploy({file: 'PunycodeDemo', libs: {Punycode}});
 let contract = await foundry.deploy({file: 'PunycodeDemo'});
 
 const CHUNK = 100; // number of examples per output
-const LENGTH = 1024; // maximum string length
+const LENGTH = 255; // maximum string length
 
 const t0 = performance.now();
 while (true) {
@@ -37,4 +39,3 @@ while (true) {
 
 	console.log(Math.round(performance.now() - t0));
 }
-

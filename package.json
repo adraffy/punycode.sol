@@ -16,7 +16,7 @@
 		"src/**/*.sol"
 	],
 	"devDependencies": {
-		"@adraffy/blocksmith": "^0.0.18",
+		"@adraffy/blocksmith": "^0.0.27",
 		"@adraffy/punycode": "^1.2.0"
 	},
 	"repository": {

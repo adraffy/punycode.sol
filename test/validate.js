@@ -4,8 +4,9 @@ import {read_labels, random_sample} from './utils.js';
 import {test, after} from 'node:test';
 
 let foundry = await Foundry.launch({infiniteCallGas: true});
-let contract = await foundry.deploy({file: 'PunycodeDemo'});
 after(() => foundry.shutdown());
+
+let contract = await foundry.deploy({file: 'PunycodeDemo'});
 
 const {UNICODE, ASCII, INVALID} = read_labels();
 const max_samples = parseFloat(process.env.N) || 1000;
